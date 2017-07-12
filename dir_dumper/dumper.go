@@ -90,6 +90,6 @@ func (d *DirDumper) getSFTPWriter(fileName string, where *url.URL) (io.WriteClos
 	return f.Create(where.Path + "/" + fileName)
 }
 
-func (d *DirDumper) getFileWriter(tableName string) (io.WriteCloser, error) {
-	return nil, nil
+func (d *DirDumper) getFileWriter(fileName string) (io.WriteCloser, error) {
+	return os.Create(d.dir + "/" + fileName)
 }
