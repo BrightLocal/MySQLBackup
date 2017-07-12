@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 
+	"strings"
+
+	"github.com/BrightLocal/MySQLBackup/db_info"
 	"github.com/BrightLocal/MySQLBackup/dir_dumper"
 	"github.com/BrightLocal/MySQLBackup/mylogin_reader"
 	"github.com/BrightLocal/MySQLBackup/worker_pool"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 )
 
 func main() {
@@ -49,35 +51,32 @@ func main() {
 		)
 	}
 	dsn += "/" + database
-	dd := dir_dumper.NewDirDumper(dsn, dir)
-	wp := worker_pool.NewPool(streams, dd.Dump)
-	names := make(chan interface{})
-	go func() {
-		for _, tableName := range getTablesList(dsn) {
-			names <- tableName
+	skipList := make(map[string]struct{})
+	if skipTables != "" {
+		for _, t := range strings.Split(skipTables, ",") {
+			skipList[strings.TrimSpace(t)] = struct{}{}
 		}
-		close(names)
-	}()
-	wp.Run(names)
-}
-
-func getTablesList(dsn string) []string {
-	conn, err := sqlx.Connect("mysql", dsn)
+	}
+	dbInfo, err := db_info.New(dsn)
 	if err != nil {
 		log.Fatalf("Error connecting: %s", err)
 	}
-	result, err := conn.Query("SHOW TABLES")
-	if err != nil {
-		log.Fatalf("Error listing tables: %s", err)
+	if dbInfo.HasBackupLock() {
+		log.Print("Database has backup locks")
+	} else {
+		log.Print("Database has no backup locks")
 	}
-	defer result.Close()
-	var tables []string
-	for result.Next() {
-		var table string
-		if err := result.Scan(&table); err != nil {
-			log.Fatalf("Error scanning: %s", err)
-		}
-		tables = append(tables, table)
-	}
-	return tables
+	dd := dir_dumper.NewDirDumper(dsn, dir, dbInfo)
+	wp := worker_pool.NewPool(streams, dd.Dump)
+	names := make(chan interface{})
+	go func() {
+		//for _, tableName := range dbInfo.Tables() {
+		//	if _, ok := skipList[tableName]; !ok {
+		//		names <- tableName
+		//	}
+		//}
+		names <- "templates"
+		close(names)
+	}()
+	wp.Run(names)
 }
