@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/BrightLocal/MySQLBackup/dir_dumper"
 	"github.com/BrightLocal/MySQLBackup/mylogin_reader"
+	"github.com/BrightLocal/MySQLBackup/worker_pool"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 func main() {
@@ -26,7 +30,7 @@ func main() {
 	flag.StringVar(&username, "username", "", "User name")
 	flag.StringVar(&password, "password", "", "Password")
 	flag.StringVar(&skipTables, "skip-tables", "", "Table names to skip")
-	flag.StringVar(&dir, "dir", "", "Destination directory path")
+	flag.StringVar(&dir, "dir", ".", "Destination directory path")
 	flag.IntVar(&streams, "streams", 8, "How many tables to dump in parallel")
 	flag.Parse()
 	if username == "" {
@@ -45,5 +49,35 @@ func main() {
 		)
 	}
 	dsn += "/" + database
-	log.Fatalf("Will use dsn %q", dsn)
+	dd := dir_dumper.NewDirDumper(dsn, dir)
+	wp := worker_pool.NewPool(streams, dd.Dump)
+	names := make(chan interface{})
+	go func() {
+		for _, tableName := range getTablesList(dsn) {
+			names <- tableName
+		}
+		close(names)
+	}()
+	wp.Run(names)
+}
+
+func getTablesList(dsn string) []string {
+	conn, err := sqlx.Connect("mysql", dsn)
+	if err != nil {
+		log.Fatalf("Error connecting: %s", err)
+	}
+	result, err := conn.Query("SHOW TABLES")
+	if err != nil {
+		log.Fatalf("Error listing tables: %s", err)
+	}
+	defer result.Close()
+	var tables []string
+	for result.Next() {
+		var table string
+		if err := result.Scan(&table); err != nil {
+			log.Fatalf("Error scanning: %s", err)
+		}
+		tables = append(tables, table)
+	}
+	return tables
 }

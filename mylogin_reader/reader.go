@@ -33,6 +33,9 @@ func Read(name ...string) *Reader {
 }
 
 func (r *Reader) GetDSN() (string, error) {
+	if r.fileName == "" {
+		return "", fmt.Errorf("could not find MySQL credentials file anywhere")
+	}
 	s, err := mylogin.ReadSections(r.fileName)
 	if err != nil {
 		return "", err
