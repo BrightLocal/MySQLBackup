@@ -27,7 +27,7 @@ func main() {
 		streams    int
 		dsn        string
 	)
-	flag.StringVar(&hostname, "hostname", "locahost", "Host name")
+	flag.StringVar(&hostname, "hostname", "localhost", "Host name")
 	flag.IntVar(&port, "port", 3306, "Port number")
 	flag.StringVar(&database, "database", "", "Database name to dump")
 	flag.StringVar(&login, "login-path", "", "Login path")

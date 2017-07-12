@@ -73,13 +73,13 @@ func (d *DirDumper) getWriter(fileName string) (io.WriteCloser, error) {
 }
 
 func (d *DirDumper) getSFTPWriter(fileName string, where *url.URL) (io.WriteCloser, error) {
-	var auths []ssh.AuthMethod
+	var authenticationMethods []ssh.AuthMethod
 	if aConn, err := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK")); err == nil {
-		auths = append(auths, ssh.PublicKeysCallback(agent.NewClient(aConn).Signers))
+		authenticationMethods = append(authenticationMethods, ssh.PublicKeysCallback(agent.NewClient(aConn).Signers))
 	}
 	conn, err := ssh.Dial("tcp", where.Host, &ssh.ClientConfig{
 		User:            where.User.Username(),
-		Auth:            auths,
+		Auth:            authenticationMethods,
 		HostKeyCallback: nil,
 	})
 	if err != nil {
