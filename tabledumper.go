@@ -43,7 +43,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error finding MySQL credentials: %s", err)
 		}
-	} else {
+	} else if username != "" {
 		dsn = fmt.Sprintf(
 			"%s:%s@tcp(%s:%d)",
 			username,
@@ -51,6 +51,9 @@ func main() {
 			hostname,
 			port,
 		)
+	} else {
+		flag.Usage()
+		return
 	}
 	if database == "" {
 		flag.Usage()

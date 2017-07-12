@@ -33,7 +33,7 @@ func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
 func (d *DirDumper) Dump(tableName interface{}) {
 	name := tableName.(string)
 	td := table_dumper.NewTableDumper(d.dsn, name, d.config)
-	fileName := name + ".json.gz"
+	fileName := name + ".csjson.gz"
 	writer, err := d.getWriter(fileName)
 	if err != nil {
 		log.Fatalf("Error getting writer: %s", err)
