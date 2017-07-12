@@ -59,7 +59,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	dsn += database
+	dsn += database + "?charset=utf8"
 	skipList := make(map[string]struct{})
 	if skipTables != "" {
 		for _, t := range strings.Split(skipTables, ",") {
@@ -68,7 +68,7 @@ func main() {
 	}
 	dbInfo, err := db_info.New(dsn)
 	if err != nil {
-		log.Fatalf("Error connecting to %q: %s", dsn, err)
+		log.Fatalf("Error connecting to %s: %s", database, err)
 	}
 	if dbInfo.HasBackupLock() {
 		log.Print("Database has backup locks")

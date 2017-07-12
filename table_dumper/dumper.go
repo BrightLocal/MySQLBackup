@@ -82,18 +82,18 @@ func (d *Dumper) Run(w io.Writer) error {
 
 func (d *Dumper) formatRow(row []interface{}) string {
 	var result []string
-	for _, r := range row {
+	for col, r := range row {
 		switch val := r.(type) {
 		case []uint8:
 			out, err := json.Marshal(string(val))
 			if err != nil {
-				log.Fatalf("Error marshalling value: %s", err)
+				log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
 			}
 			result = append(result, string(out))
 		case nil:
 			result = append(result, "null")
 		default:
-			log.Fatalf("Got unexpected column type: %# v", r)
+			log.Fatalf("Got unexpected type of column %d in table %s[%s]: %# v", col, d.tableName, string(row[0].([]byte)), r)
 		}
 	}
 	return strings.Join(result, ",") + "\n"
