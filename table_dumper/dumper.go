@@ -1,16 +1,14 @@
 package table_dumper
 
 import (
-	"fmt"
-	"log"
-
 	"encoding/json"
+	"fmt"
+	"io"
+	"log"
 	"strings"
-
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"io"
 )
 
 type Config interface {
@@ -33,28 +31,38 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 
 func (d *Dumper) Run(w io.Writer) error {
 	log.Printf("Starting dumping table %q", d.tableName)
-	//if d.config != nil && d.config.HasBackupLock() {
-	//	log.Printf("LOCK TABLES FOR BACKUP")
-	//	log.Printf("LOCK BINLOG FOR BACKUP")
-	//}
-	//log.Printf("START TRANSACTION /*!40108 WITH CONSISTENT SNAPSHOT */")
-	//if d.config != nil && d.config.HasBackupLock() {
-	//	log.Printf("UNLOCK TABLES /* trx-only */")
-	//	log.Printf("UNLOCK BINLOG")
-	//}
-
-	query := fmt.Sprintf("SELECT * FROM `%s`", d.tableName)
-	log.Printf("%s", query)
 	conn, err := sqlx.Connect("mysql", d.dsn)
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
+	if d.config != nil && d.config.HasBackupLock() {
+		if _, err := conn.Exec("LOCK TABLES FOR BACKUP"); err != nil {
+			return err
+		}
+		if _, err := conn.Exec("LOCK BINLOG FOR BACKUP"); err != nil {
+			return err
+		}
+	}
+	if _, err := conn.Exec("START TRANSACTION /*!40108 WITH CONSISTENT SNAPSHOT */"); err != nil {
+		return err
+	}
+	if d.config != nil && d.config.HasBackupLock() {
+		if _, err := conn.Exec("UNLOCK TABLES /* trx-only */"); err != nil {
+			return err
+		}
+		if _, err := conn.Exec("UNLOCK BINLOG"); err != nil {
+			return err
+		}
+	}
+	query := fmt.Sprintf("SELECT * FROM `%s`", d.tableName)
 	result, err := conn.Queryx(query)
 	if err != nil {
 		return err
 	}
 	defer result.Close()
 	n := 0
+	totalBytes := 0
 	start := time.Now()
 	for result.Next() {
 		row, err := result.SliceScan()
@@ -62,9 +70,13 @@ func (d *Dumper) Run(w io.Writer) error {
 			return err
 		}
 		n++
-		log.Printf("%s", d.formatRow(row))
+		b, err := w.Write([]byte(d.formatRow(row)))
+		if err != nil {
+			return err
+		}
+		totalBytes += b
 	}
-	log.Printf("Finished dumping table %q (%d rows) in %s", d.tableName, n, time.Now().Sub(start).String())
+	log.Printf("Finished dumping table %q (%d rows, %d bytes) in %s", d.tableName, n, totalBytes, time.Now().Sub(start).String())
 	return nil
 }
 
@@ -81,8 +93,8 @@ func (d *Dumper) formatRow(row []interface{}) string {
 		case nil:
 			result = append(result, "null")
 		default:
-			log.Fatalf("%# v", r)
+			log.Fatalf("Got unexpected column type: %# v", r)
 		}
 	}
-	return strings.Join(result, ",")
+	return strings.Join(result, ",") + "\n"
 }

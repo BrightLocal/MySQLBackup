@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-
 	"strings"
 
 	"github.com/BrightLocal/MySQLBackup/db_info"
@@ -77,12 +76,11 @@ func main() {
 	wp := worker_pool.NewPool(streams, dd.Dump)
 	names := make(chan interface{})
 	go func() {
-		//for _, tableName := range dbInfo.Tables() {
-		//	if _, ok := skipList[tableName]; !ok {
-		//		names <- tableName
-		//	}
-		//}
-		names <- "templates"
+		for _, tableName := range dbInfo.Tables() {
+			if _, ok := skipList[tableName]; !ok {
+				names <- tableName
+			}
+		}
 		close(names)
 	}()
 	wp.Run(names)

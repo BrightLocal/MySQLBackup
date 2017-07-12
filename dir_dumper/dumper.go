@@ -1,14 +1,14 @@
 package dir_dumper
 
 import (
+	"compress/gzip"
 	"errors"
 	"io"
 	"log"
-	"net/url"
-	"strings"
-
 	"net"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/BrightLocal/MySQLBackup/table_dumper"
 	"github.com/pkg/sftp"
@@ -39,7 +39,9 @@ func (d *DirDumper) Dump(tableName interface{}) {
 		log.Fatalf("Error getting writer: %s", err)
 	}
 	defer writer.Close()
-	if err := td.Run(writer); err != nil {
+	gzWriter := gzip.NewWriter(writer)
+	defer gzWriter.Close()
+	if err := td.Run(gzWriter); err != nil {
 		log.Printf("Error running worker: %s", err)
 	}
 }
