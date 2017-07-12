@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"io"
 )
 
 type Config interface {
@@ -30,8 +31,8 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 	}
 }
 
-func (d *Dumper) Run(directory string) error {
-	log.Printf("Starting dumping table %q into directory %q", d.tableName, directory)
+func (d *Dumper) Run(w io.Writer) error {
+	log.Printf("Starting dumping table %q", d.tableName)
 	//if d.config != nil && d.config.HasBackupLock() {
 	//	log.Printf("LOCK TABLES FOR BACKUP")
 	//	log.Printf("LOCK BINLOG FOR BACKUP")
@@ -63,7 +64,7 @@ func (d *Dumper) Run(directory string) error {
 		n++
 		log.Printf("%s", d.formatRow(row))
 	}
-	log.Printf("Finished dumping table %q (%d rows) into directory %q in %s", d.tableName, n, directory, time.Now().Sub(start).String())
+	log.Printf("Finished dumping table %q (%d rows) in %s", d.tableName, n, time.Now().Sub(start).String())
 	return nil
 }
 

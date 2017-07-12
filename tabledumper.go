@@ -15,10 +15,12 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	var (
 		hostname   string
 		port       int
 		database   string
+		login      string
 		username   string
 		password   string
 		skipTables string
@@ -29,15 +31,16 @@ func main() {
 	flag.StringVar(&hostname, "hostname", "locahost", "Host name")
 	flag.IntVar(&port, "port", 3306, "Port number")
 	flag.StringVar(&database, "database", "", "Database name to dump")
+	flag.StringVar(&login, "login-path", "", "Login path")
 	flag.StringVar(&username, "username", "", "User name")
 	flag.StringVar(&password, "password", "", "Password")
 	flag.StringVar(&skipTables, "skip-tables", "", "Table names to skip")
 	flag.StringVar(&dir, "dir", ".", "Destination directory path")
 	flag.IntVar(&streams, "streams", 8, "How many tables to dump in parallel")
 	flag.Parse()
-	if username == "" {
+	if login != "" {
 		var err error
-		dsn, err = mylogin_reader.Read().GetDSN()
+		dsn, err = mylogin_reader.Read().GetDSN(login)
 		if err != nil {
 			log.Fatalf("Error finding MySQL credentials: %s", err)
 		}
@@ -50,7 +53,11 @@ func main() {
 			port,
 		)
 	}
-	dsn += "/" + database
+	if database == "" {
+		flag.Usage()
+		return
+	}
+	dsn += database
 	skipList := make(map[string]struct{})
 	if skipTables != "" {
 		for _, t := range strings.Split(skipTables, ",") {
@@ -59,7 +66,7 @@ func main() {
 	}
 	dbInfo, err := db_info.New(dsn)
 	if err != nil {
-		log.Fatalf("Error connecting: %s", err)
+		log.Fatalf("Error connecting to %q: %s", dsn, err)
 	}
 	if dbInfo.HasBackupLock() {
 		log.Print("Database has backup locks")

@@ -32,7 +32,7 @@ func Read(name ...string) *Reader {
 	}
 }
 
-func (r *Reader) GetDSN() (string, error) {
+func (r *Reader) GetDSN(login string) (string, error) {
 	if r.fileName == "" {
 		return "", fmt.Errorf("could not find MySQL credentials file anywhere")
 	}
@@ -40,15 +40,8 @@ func (r *Reader) GetDSN() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if len(s) > 0 {
-		dsn := fmt.Sprintf(
-			"%s:%s@tcp(%s:%s)",
-			*(s[0].Login.User),
-			*(s[0].Login.Password),
-			*(s[0].Login.Host),
-			*(s[0].Login.Port),
-		)
-		return dsn, nil
+	if login := s.Login(login); login != nil {
+		return login.DSN(), nil
 	}
 	return "", fmt.Errorf("no sections found")
 }
