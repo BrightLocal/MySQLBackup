@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"os/user"
 	"strings"
 
 	"github.com/BrightLocal/MySQLBackup/table_dumper"
@@ -33,16 +34,20 @@ func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
 func (d *DirDumper) Dump(tableName interface{}) {
 	name := tableName.(string)
 	td := table_dumper.NewTableDumper(d.dsn, name, d.config)
-	fileName := name + ".csjson.gz"
+	fileName := name + ".csjson.gz" // comma separated JSON values, compressed
 	writer, err := d.getWriter(fileName)
 	if err != nil {
 		log.Fatalf("Error getting writer: %s", err)
 	}
-	defer writer.Close()
 	gzWriter := gzip.NewWriter(writer)
-	defer gzWriter.Close()
 	if err := td.Run(gzWriter); err != nil {
 		log.Printf("Error running worker: %s", err)
+	}
+	if err := gzWriter.Close(); err != nil {
+		log.Printf("Error closing compressor: %s", err)
+	}
+	if err := writer.Close(); err != nil {
+		log.Printf("Error closing file %q: %s", fileName, err)
 	}
 }
 
@@ -52,11 +57,17 @@ func (d *DirDumper) getWriter(fileName string) (io.WriteCloser, error) {
 		if err != nil {
 			return nil, err
 		}
-		if where.User == nil {
-			return nil, errors.New("user name expected")
-		}
-		if where.User.Username() == "" {
-			return nil, errors.New("user name expected")
+		if where.User == nil || where.User.Username() == "" {
+			// Try to figure out user name
+			if userName := os.Getenv("USER"); userName != "" {
+				where.User = url.UserPassword(userName, "")
+			} else {
+				if currentUser, err := user.Current(); err == nil {
+					where.User = url.UserPassword(currentUser.Username, "")
+				} else {
+					return nil, errors.New("user name expected")
+				}
+			}
 		}
 		if where.Path == "" {
 			return nil, errors.New("path expected")
@@ -80,7 +91,7 @@ func (d *DirDumper) getSFTPWriter(fileName string, where *url.URL) (io.WriteClos
 	conn, err := ssh.Dial("tcp", where.Host, &ssh.ClientConfig{
 		User:            where.User.Username(),
 		Auth:            authenticationMethods,
-		HostKeyCallback: nil,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	})
 	if err != nil {
 		return nil, err

@@ -1,9 +1,12 @@
 package main
 
+// 10:55:57
+
 import (
 	"flag"
 	"fmt"
 	"log"
+	"runtime"
 	"strings"
 
 	"github.com/BrightLocal/MySQLBackup/db_info"
@@ -35,7 +38,7 @@ func main() {
 	flag.StringVar(&password, "password", "", "Password")
 	flag.StringVar(&skipTables, "skip-tables", "", "Table names to skip")
 	flag.StringVar(&dir, "dir", ".", "Destination directory path")
-	flag.IntVar(&streams, "streams", 8, "How many tables to dump in parallel")
+	flag.IntVar(&streams, "streams", runtime.NumCPU(), "How many tables to dump in parallel")
 	flag.Parse()
 	if login != "" {
 		var err error
@@ -44,13 +47,22 @@ func main() {
 			log.Fatalf("Error finding MySQL credentials: %s", err)
 		}
 	} else if username != "" {
-		dsn = fmt.Sprintf(
-			"%s:%s@tcp(%s:%d)",
-			username,
-			password,
-			hostname,
-			port,
-		)
+		if strings.HasPrefix(hostname, "/") {
+			dsn = fmt.Sprintf(
+				"%s:%s@unix(%s)/",
+				username,
+				password,
+				hostname,
+			)
+		} else {
+			dsn = fmt.Sprintf(
+				"%s:%s@tcp(%s:%d)/",
+				username,
+				password,
+				hostname,
+				port,
+			)
+		}
 	} else {
 		flag.Usage()
 		return
@@ -68,7 +80,7 @@ func main() {
 	}
 	dbInfo, err := db_info.New(dsn)
 	if err != nil {
-		log.Fatalf("Error connecting to %s: %s", database, err)
+		log.Fatalf("Error connecting to %s: %s", dsn, err)
 	}
 	if dbInfo.HasBackupLock() {
 		log.Print("Database has backup locks")
@@ -76,6 +88,7 @@ func main() {
 		log.Print("Database has no backup locks")
 	}
 	dd := dir_dumper.NewDirDumper(dsn, dir, dbInfo)
+	log.Printf("Will use %d streams", streams)
 	wp := worker_pool.NewPool(streams, dd.Dump)
 	names := make(chan interface{})
 	go func() {

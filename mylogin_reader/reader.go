@@ -9,27 +9,26 @@ import (
 
 type Reader struct {
 	fileName string
+	client   *mylogin.Login
 }
 
 func Read(name ...string) *Reader {
-	var fileName string
+	r := &Reader{}
 	if len(name) == 0 {
 		home := os.Getenv("HOME")
 		myLogin := home + "/.mylogin.cnf"
 		my := home + "/.my.cnf"
 		if _, err := os.Stat(myLogin); os.IsNotExist(err) {
 			if _, err := os.Stat(my); !os.IsNotExist(err) {
-				fileName = my
+				r.fileName = my
 			}
 		} else {
-			fileName = myLogin
+			r.fileName = myLogin
 		}
 	} else {
-		fileName = name[0]
+		r.fileName = name[0]
 	}
-	return &Reader{
-		fileName: fileName,
-	}
+	return r
 }
 
 func (r *Reader) GetDSN(login string) (string, error) {
