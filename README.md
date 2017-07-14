@@ -6,10 +6,10 @@ Usage:
 ```
  tabledumper \
  -login-path=backup \                  # read connection credentials from ~/.mylogin.cnf or ~/.my.cnf
- -hostname=localhost \
- -port=3306 \
- -streams=8                            # how many tables to dump in parallel
- -database=test \
+ -hostname=localhost \                 # can be unix socket path
+ -port=3306 \                          # ignored if unix socket is used
+ -streams=8                            # how many tables to dump in parallel, defaults to the number of CPU cores
+ -database=test \                      # database to dump
  -skip-tables=temp_table,temp2_table \ # will not dump these tables
  -dir=/path/to/directory \             # where to store dumps. sftp://user@host/path/to/directory also supported
  -username=user \                      # will be used if no login-path is given
