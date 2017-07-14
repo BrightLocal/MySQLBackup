@@ -1,7 +1,6 @@
 package dir_dumper
 
 import (
-	"compress/gzip"
 	"errors"
 	"io"
 	"log"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/BrightLocal/MySQLBackup/table_dumper"
+	"github.com/dsnet/compress/bzip2"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -44,20 +44,20 @@ func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
 func (d *DirDumper) Dump(tableName interface{}) {
 	name := tableName.(string)
 	td := table_dumper.NewTableDumper(d.dsn, name, d.config)
-	fileName := name + ".csjson.gz" // comma separated JSON values, compressed
+	fileName := name + ".csjson.bz2" // comma separated JSON values, compressed
 	writer, err := d.getWriter(fileName)
 	if err != nil {
 		log.Fatalf("Error getting writer: %s", err)
 	}
-	gzWriter := gzip.NewWriter(writer)
-	dumpResult, err := td.Run(gzWriter)
+	compressor, _ := bzip2.NewWriter(writer, &bzip2.WriterConfig{Level: bzip2.BestCompression})
+	dumpResult, err := td.Run(compressor)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)
 	}
 	d.totalBytes += dumpResult.Bytes()
 	d.totalRows += dumpResult.Rows()
 	d.totalDuration += dumpResult.Duration()
-	if err := gzWriter.Close(); err != nil {
+	if err := compressor.Close(); err != nil {
 		log.Printf("Error closing compressor: %s", err)
 	}
 	if err := writer.Close(); err != nil {
