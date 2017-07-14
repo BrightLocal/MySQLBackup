@@ -1,0 +1,485 @@
+2017/07/13 10:55:57 tabledumper.go:83: Database has backup locks
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_key_request_summary"
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "addon_capabilities"
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_key_individual_pricing"
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_key_ip_address_summary"
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "active_customers_country_stats"
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "addons"
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "active_customers_package_stats"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "addon_capabilities" (50 rows, 1760 bytes) in 1.43332ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_keys"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "api_key_individual_pricing" (252 rows, 19622 bytes) in 5.511969ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_proxy_limit_emails"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "api_proxy_limit_emails" (1 rows, 37 bytes) in 486.113µs
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_proxy_limits"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "active_customers_country_stats" (3339 rows, 83691 bytes) in 88.877061ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "api_proxy_usage"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "addons" (48 rows, 9045 bytes) in 2.126628ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "area_codes"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "api_proxy_limits" (2 rows, 64 bytes) in 691.108µs
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "business_categories"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "area_codes" (339 rows, 7708 bytes) in 5.064813ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "business_category_localisations"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "api_proxy_usage" (1403 rows, 64446 bytes) in 83.497058ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "business_groups"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "active_customers_package_stats" (3206 rows, 88255 bytes) in 336.205953ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "business_name_frequency"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "business_groups" (16 rows, 422 bytes) in 842.574µs
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "business_specialists"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "api_key_ip_address_summary" (3387 rows, 228066 bytes) in 427.512184ms
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "capability_types"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "capability_types" (15 rows, 937 bytes) in 808.616µs
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "cb_campaign_aggregators"
+2017/07/13 10:56:00 dumper.go:79: Finished dumping table "business_specialists" (5 rows, 82 bytes) in 269.99µs
+2017/07/13 10:56:00 dumper.go:33: Starting dumping table "cb_campaign_citations"
+2017/07/13 10:56:01 dumper.go:79: Finished dumping table "business_categories" (6705 rows, 421789 bytes) in 641.255572ms
+2017/07/13 10:56:01 dumper.go:33: Starting dumping table "cb_campaigns"
+2017/07/13 10:56:01 dumper.go:79: Finished dumping table "business_category_localisations" (55002 rows, 2901207 bytes) in 748.555576ms
+2017/07/13 10:56:01 dumper.go:33: Starting dumping table "cb_citation_country"
+2017/07/13 10:56:01 dumper.go:79: Finished dumping table "cb_citation_country" (2172 rows, 27369 bytes) in 70.15892ms
+2017/07/13 10:56:01 dumper.go:33: Starting dumping table "cb_citation_note"
+2017/07/13 10:56:01 dumper.go:79: Finished dumping table "api_keys" (1578 rows, 1040609 bytes) in 1.23182986s
+2017/07/13 10:56:01 dumper.go:33: Starting dumping table "cb_citations"
+2017/07/13 10:56:01 dumper.go:79: Finished dumping table "cb_citations" (2482 rows, 498093 bytes) in 227.007649ms
+2017/07/13 10:56:01 dumper.go:33: Starting dumping table "cb_citations_business_categories"
+2017/07/13 10:56:01 dumper.go:79: Finished dumping table "cb_citation_note" (103 rows, 22463 bytes) in 34.325007ms
+2017/07/13 10:56:01 dumper.go:33: Starting dumping table "cb_credit_packages"
+2017/07/13 10:56:02 dumper.go:79: Finished dumping table "cb_credit_packages" (3 rows, 53 bytes) in 255.204µs
+2017/07/13 10:56:02 dumper.go:33: Starting dumping table "cb_credits"
+2017/07/13 10:56:02 dumper.go:79: Finished dumping table "cb_citations_business_categories" (2561 rows, 53782 bytes) in 50.133264ms
+2017/07/13 10:56:02 dumper.go:33: Starting dumping table "cb_data"
+2017/07/13 10:56:02 dumper.go:79: Finished dumping table "cb_campaign_aggregators" (25546 rows, 3645434 bytes) in 1.900020469s
+2017/07/13 10:56:02 dumper.go:33: Starting dumping table "cb_data_history"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "api_key_request_summary" (36553 rows, 3128752 bytes) in 3.169352613s
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_employees"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_data_history" (435 rows, 1649135 bytes) in 458.821687ms
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_internal_customer_notes"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_internal_customer_notes" (46 rows, 8733 bytes) in 1.186992ms
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_notifications"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_notifications" (64 rows, 2603 bytes) in 1.723387ms
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_packages"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_employees" (83 rows, 2103 bytes) in 1.385787ms
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_partners"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_packages" (13 rows, 674 bytes) in 644.871µs
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_secondary_campaigns"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_partners" (2 rows, 106 bytes) in 267.603µs
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_submission_note_messages"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_credits" (70996 rows, 3656940 bytes) in 1.604086602s
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "cb_tasks"
+2017/07/13 10:56:03 dumper.go:79: Finished dumping table "cb_submission_note_messages" (14 rows, 1384 bytes) in 1.045043ms
+2017/07/13 10:56:03 dumper.go:33: Starting dumping table "chart_mogul_import"
+2017/07/13 10:56:04 dumper.go:79: Finished dumping table "chart_mogul_import" (4 rows, 294 bytes) in 616.679µs
+2017/07/13 10:56:04 dumper.go:33: Starting dumping table "cities"
+2017/07/13 10:56:05 dumper.go:79: Finished dumping table "cities" (49415 rows, 921404 bytes) in 665.446345ms
+2017/07/13 10:56:05 dumper.go:33: Starting dumping table "cl_cb_location"
+2017/07/13 10:56:07 dumper.go:79: Finished dumping table "cl_cb_location" (69337 rows, 1774932 bytes) in 1.575141336s
+2017/07/13 10:56:07 dumper.go:33: Starting dumping table "cl_ct_location"
+2017/07/13 10:56:07 dumper.go:79: Finished dumping table "cb_tasks" (92504 rows, 7391631 bytes) in 3.547769852s
+2017/07/13 10:56:07 dumper.go:33: Starting dumping table "cl_customer_clients"
+2017/07/13 10:56:08 dumper.go:79: Finished dumping table "cl_customer_clients" (41180 rows, 4114584 bytes) in 1.469464711s
+2017/07/13 10:56:08 dumper.go:33: Starting dumping table "cl_customer_locations"
+2017/07/13 10:56:09 dumper.go:79: Finished dumping table "cb_secondary_campaigns" (37230 rows, 14406963 bytes) in 5.622824568s
+2017/07/13 10:56:09 dumper.go:33: Starting dumping table "cl_gpw_location"
+2017/07/13 10:56:09 dumper.go:79: Finished dumping table "cl_ct_location" (153983 rows, 4049575 bytes) in 2.664391136s
+2017/07/13 10:56:09 dumper.go:33: Starting dumping table "cl_lscu_location"
+2017/07/13 10:56:10 dumper.go:79: Finished dumping table "cl_gpw_location" (63582 rows, 1617540 bytes) in 1.221160925s
+2017/07/13 10:56:10 dumper.go:33: Starting dumping table "cl_lsrc_location"
+2017/07/13 10:56:11 dumper.go:79: Finished dumping table "cl_lscu_location" (78270 rows, 2002075 bytes) in 1.38183591s
+2017/07/13 10:56:11 dumper.go:33: Starting dumping table "cl_rb_location"
+2017/07/13 10:56:11 dumper.go:79: Finished dumping table "cl_rb_location" (5396 rows, 124005 bytes) in 151.102614ms
+2017/07/13 10:56:11 dumper.go:33: Starting dumping table "cl_reports_count"
+2017/07/13 10:56:11 dumper.go:79: Finished dumping table "business_name_frequency" (81395 rows, 1146496 bytes) in 10.23819566s
+2017/07/13 10:56:11 dumper.go:33: Starting dumping table "cl_rf_location"
+2017/07/13 10:56:13 dumper.go:79: Finished dumping table "cl_rf_location" (31768 rows, 786510 bytes) in 1.265974968s
+2017/07/13 10:56:13 dumper.go:33: Starting dumping table "cl_stared_client"
+2017/07/13 10:56:13 dumper.go:79: Finished dumping table "cl_stared_client" (1139 rows, 25537 bytes) in 15.609005ms
+2017/07/13 10:56:13 dumper.go:33: Starting dumping table "cl_stared_location"
+2017/07/13 10:56:13 dumper.go:79: Finished dumping table "cl_stared_location" (2570 rows, 60845 bytes) in 71.885779ms
+2017/07/13 10:56:13 dumper.go:33: Starting dumping table "client_tags"
+2017/07/13 10:56:14 dumper.go:79: Finished dumping table "cl_lsrc_location" (203202 rows, 5339240 bytes) in 3.540072692s
+2017/07/13 10:56:14 dumper.go:33: Starting dumping table "clients"
+2017/07/13 10:56:16 dumper.go:79: Finished dumping table "client_tags" (118972 rows, 5374636 bytes) in 2.52253147s
+2017/07/13 10:56:16 dumper.go:33: Starting dumping table "cmd_script_control"
+2017/07/13 10:56:16 dumper.go:79: Finished dumping table "cmd_script_control" (1 rows, 29 bytes) in 313.265µs
+2017/07/13 10:56:16 dumper.go:33: Starting dumping table "contacts"
+2017/07/13 10:56:17 dumper.go:79: Finished dumping table "contacts" (1519 rows, 216955 bytes) in 333.468031ms
+2017/07/13 10:56:17 dumper.go:33: Starting dumping table "countries"
+2017/07/13 10:56:17 dumper.go:79: Finished dumping table "countries" (246 rows, 5957 bytes) in 3.080982ms
+2017/07/13 10:56:17 dumper.go:33: Starting dumping table "coupons"
+2017/07/13 10:56:17 dumper.go:79: Finished dumping table "coupons" (0 rows, 0 bytes) in 7.331µs
+2017/07/13 10:56:17 dumper.go:33: Starting dumping table "ct2_ct_citations"
+2017/07/13 10:56:25 dumper.go:79: Finished dumping table "cl_reports_count" (515300 rows, 14830400 bytes) in 13.507655413s
+2017/07/13 10:56:25 dumper.go:33: Starting dumping table "ct2_ct_citations_url"
+2017/07/13 10:56:39 dumper.go:79: Finished dumping table "cb_campaigns" (77955 rows, 74243929 bytes) in 38.299104286s
+2017/07/13 10:56:39 dumper.go:33: Starting dumping table "ct2_ct_old_citations"
+2017/07/13 10:57:23 dumper.go:79: Finished dumping table "clients" (188212 rows, 113844426 bytes) in 1m9.243394626s
+2017/07/13 10:57:23 dumper.go:33: Starting dumping table "ct2_domains"
+2017/07/13 10:57:30 dumper.go:79: Finished dumping table "ct2_ct_old_citations" (707964 rows, 127542924 bytes) in 50.56235638s
+2017/07/13 10:57:30 dumper.go:33: Starting dumping table "ct_competitor_citations"
+2017/07/13 10:57:37 dumper.go:79: Finished dumping table "cl_customer_locations" (330849 rows, 210134542 bytes) in 1m28.360151125s
+2017/07/13 10:57:37 dumper.go:33: Starting dumping table "ct_competitors"
+2017/07/13 10:57:58 dumper.go:79: Finished dumping table "ct_competitors" (824757 rows, 69611616 bytes) in 21.479240592s
+2017/07/13 10:57:58 dumper.go:33: Starting dumping table "ct_competitors_migration_log"
+2017/07/13 10:58:00 dumper.go:79: Finished dumping table "ct_competitors_migration_log" (318588 rows, 2796943 bytes) in 1.780681683s
+2017/07/13 10:58:00 dumper.go:33: Starting dumping table "ct_competitors_v2"
+2017/07/13 10:58:13 dumper.go:79: Finished dumping table "cb_data" (77938 rows, 287727840 bytes) in 2m10.865526909s
+2017/07/13 10:58:13 dumper.go:33: Starting dumping table "ct_domain_feedback"
+2017/07/13 10:58:13 dumper.go:79: Finished dumping table "ct_domain_feedback" (4049 rows, 820515 bytes) in 105.999994ms
+2017/07/13 10:58:13 dumper.go:33: Starting dumping table "ct_lookup"
+2017/07/13 10:58:13 dumper.go:79: Finished dumping table "ct_lookup" (7424 rows, 718266 bytes) in 158.777419ms
+2017/07/13 10:58:13 dumper.go:33: Starting dumping table "ct_lookup_blacklist"
+2017/07/13 10:58:13 dumper.go:79: Finished dumping table "ct_lookup_blacklist" (511 rows, 9568 bytes) in 2.956228ms
+2017/07/13 10:58:13 dumper.go:33: Starting dumping table "ct_nap_status_summaries"
+2017/07/13 10:58:24 dumper.go:79: Finished dumping table "ct_competitors_v2" (805569 rows, 75852403 bytes) in 23.540639723s
+2017/07/13 10:58:24 dumper.go:33: Starting dumping table "ct_packages"
+2017/07/13 10:58:24 dumper.go:79: Finished dumping table "ct_packages" (10 rows, 310 bytes) in 375.294µs
+2017/07/13 10:58:24 dumper.go:33: Starting dumping table "ct_possible_citations_clean_log"
+2017/07/13 10:58:26 dumper.go:79: Finished dumping table "ct_possible_citations_clean_log" (324272 rows, 2848380 bytes) in 2.324369728s
+2017/07/13 10:58:26 dumper.go:33: Starting dumping table "ct_possible_citations_migration_log"
+2017/07/13 10:58:28 dumper.go:79: Finished dumping table "ct_possible_citations_migration_log" (322084 rows, 2828680 bytes) in 1.85523827s
+2017/07/13 10:58:28 dumper.go:33: Starting dumping table "ct_report_domains"
+2017/07/13 10:58:45 dumper.go:79: Finished dumping table "ct_nap_status_summaries" (1352064 rows, 64688186 bytes) in 31.939660671s
+2017/07/13 10:58:45 dumper.go:33: Starting dumping table "ct_report_runs"
+2017/07/13 10:59:41 dumper.go:79: Finished dumping table "ct_report_runs" (1589457 rows, 184056599 bytes) in 55.585126347s
+2017/07/13 10:59:41 dumper.go:33: Starting dumping table "ct_report_summary"
+2017/07/13 11:00:22 dumper.go:79: Finished dumping table "ct_report_summary" (1582907 rows, 61129938 bytes) in 41.207422885s
+2017/07/13 11:00:22 dumper.go:33: Starting dumping table "ct_reports"
+2017/07/13 11:00:58 dumper.go:79: Finished dumping table "ct_reports" (409880 rows, 141198819 bytes) in 35.522553314s
+2017/07/13 11:00:58 dumper.go:33: Starting dumping table "ct_ru_directories"
+2017/07/13 11:00:58 dumper.go:79: Finished dumping table "ct_ru_directories" (213 rows, 18327 bytes) in 6.495867ms
+2017/07/13 11:00:58 dumper.go:33: Starting dumping table "ct_ru_history"
+2017/07/13 11:01:07 dumper.go:79: Finished dumping table "ct_ru_history" (387776 rows, 20850121 bytes) in 8.78005301s
+2017/07/13 11:01:07 dumper.go:33: Starting dumping table "ct_ru_report_campaigns"
+2017/07/13 11:01:07 dumper.go:79: Finished dumping table "ct_ru_report_campaigns" (18392 rows, 418492 bytes) in 267.843992ms
+2017/07/13 11:01:07 dumper.go:33: Starting dumping table "ct_ru_reports"
+2017/07/13 11:01:07 dumper.go:79: Finished dumping table "ct_ru_reports" (703 rows, 59879 bytes) in 15.120838ms
+2017/07/13 11:01:07 dumper.go:33: Starting dumping table "ct_seomoz_data"
+2017/07/13 11:01:09 dumper.go:79: Finished dumping table "ct_seomoz_data" (58264 rows, 3789185 bytes) in 1.346496819s
+2017/07/13 11:01:09 dumper.go:33: Starting dumping table "ct_top_directories_summaries"
+2017/07/13 11:01:14 dumper.go:79: Finished dumping table "ct_top_directories_summaries" (338016 rows, 9281457 bytes) in 5.660279375s
+2017/07/13 11:01:14 dumper.go:33: Starting dumping table "customer_addons"
+2017/07/13 11:01:14 dumper.go:79: Finished dumping table "customer_addons" (824 rows, 85746 bytes) in 26.015414ms
+2017/07/13 11:01:14 dumper.go:33: Starting dumping table "customer_exit_survey"
+2017/07/13 11:01:14 dumper.go:79: Finished dumping table "customer_exit_survey" (368 rows, 70288 bytes) in 22.112146ms
+2017/07/13 11:01:14 dumper.go:33: Starting dumping table "customer_payments"
+2017/07/13 11:01:20 dumper.go:79: Finished dumping table "customer_payments" (132454 rows, 18328066 bytes) in 5.413161187s
+2017/07/13 11:01:20 dumper.go:33: Starting dumping table "customer_subscriptions"
+2017/07/13 11:01:22 dumper.go:79: Finished dumping table "customer_subscriptions" (49868 rows, 8374219 bytes) in 2.331627494s
+2017/07/13 11:01:22 dumper.go:33: Starting dumping table "customers"
+2017/07/13 11:01:24 dumper.go:79: Finished dumping table "customers" (50673 rows, 6175593 bytes) in 1.738453923s
+2017/07/13 11:01:24 dumper.go:33: Starting dumping table "facebook_access_token"
+2017/07/13 11:01:24 dumper.go:79: Finished dumping table "facebook_access_token" (2469 rows, 571478 bytes) in 94.937716ms
+2017/07/13 11:01:24 dumper.go:33: Starting dumping table "facebook_account"
+2017/07/13 11:01:24 dumper.go:79: Finished dumping table "facebook_account" (2469 rows, 155354 bytes) in 67.256402ms
+2017/07/13 11:01:24 dumper.go:33: Starting dumping table "facebook_account_location"
+2017/07/13 11:01:24 dumper.go:79: Finished dumping table "facebook_account_location" (5893 rows, 378274 bytes) in 163.061241ms
+2017/07/13 11:01:24 dumper.go:33: Starting dumping table "flags"
+2017/07/13 11:01:24 dumper.go:79: Finished dumping table "flags" (3 rows, 71 bytes) in 254.924µs
+2017/07/13 11:01:24 dumper.go:33: Starting dumping table "gmb_account"
+2017/07/13 11:01:24 dumper.go:79: Finished dumping table "gmb_account" (1870 rows, 157730 bytes) in 63.207515ms
+2017/07/13 11:01:24 dumper.go:33: Starting dumping table "gmb_location"
+2017/07/13 11:01:28 dumper.go:79: Finished dumping table "gmb_location" (38275 rows, 28292511 bytes) in 4.130490124s
+2017/07/13 11:01:28 dumper.go:33: Starting dumping table "google_account_location"
+2017/07/13 11:01:29 dumper.go:79: Finished dumping table "google_account_location" (12160 rows, 945315 bytes) in 317.905689ms
+2017/07/13 11:01:29 dumper.go:33: Starting dumping table "google_accounts"
+2017/07/13 11:01:31 dumper.go:79: Finished dumping table "google_accounts" (5755 rows, 17055361 bytes) in 1.781099465s
+2017/07/13 11:01:31 dumper.go:33: Starting dumping table "google_place"
+2017/07/13 11:05:53 dumper.go:79: Finished dumping table "ct2_domains" (3491105 rows, 206039120 bytes) in 8m30.158599745s
+2017/07/13 11:05:53 dumper.go:33: Starting dumping table "google_place_citations"
+2017/07/13 11:06:58 dumper.go:79: Finished dumping table "cb_campaign_citations" (9731060 rows, 1527736957 bytes) in 10m56.971422345s
+2017/07/13 11:06:58 dumper.go:33: Starting dumping table "google_place_citations_summary"
+2017/07/13 11:07:16 dumper.go:79: Finished dumping table "google_place_citations_summary" (844759 rows, 32283619 bytes) in 18.262756962s
+2017/07/13 11:07:16 dumper.go:33: Starting dumping table "gpw_categories"
+2017/07/13 11:07:24 dumper.go:79: Finished dumping table "gpw_categories" (180822 rows, 6141991 bytes) in 7.691046113s
+2017/07/13 11:07:24 dumper.go:33: Starting dumping table "gpw_citations_v3"
+2017/07/13 11:09:38 dumper.go:79: Finished dumping table "ct_report_domains" (20245474 rows, 2725627853 bytes) in 11m10.555789902s
+2017/07/13 11:09:39 dumper.go:33: Starting dumping table "gpw_competitor_categories"
+2017/07/13 11:19:30 dumper.go:79: Finished dumping table "gpw_competitor_categories" (25843750 rows, 1066788269 bytes) in 9m51.81318469s
+2017/07/13 11:19:30 dumper.go:33: Starting dumping table "gpw_competitor_citations"
+2017/07/13 11:20:17 dumper.go:79: Finished dumping table "google_place" (7509462 rows, 7350809839 bytes) in 18m46.913895554s
+2017/07/13 11:20:17 dumper.go:33: Starting dumping table "gpw_customer_duplicates"
+2017/07/13 11:20:18 dumper.go:79: Finished dumping table "gpw_customer_duplicates" (17453 rows, 601536 bytes) in 642.072349ms
+2017/07/13 11:20:18 dumper.go:33: Starting dumping table "gpw_customer_history"
+2017/07/13 11:20:31 dumper.go:79: Finished dumping table "gpw_customer_history" (339670 rows, 14779377 bytes) in 12.77836086s
+2017/07/13 11:20:31 dumper.go:33: Starting dumping table "gpw_customer_reviews"
+2017/07/13 11:25:12 dumper.go:79: Finished dumping table "ct2_ct_citations_url" (34353259 rows, 4734356468 bytes) in 28m47.592592866s
+2017/07/13 11:25:12 dumper.go:33: Starting dumping table "gpw_customers"
+2017/07/13 11:34:06 dumper.go:79: Finished dumping table "gpw_customers" (69215 rows, 799781996 bytes) in 8m53.351103489s
+2017/07/13 11:34:06 dumper.go:33: Starting dumping table "gpw_domains"
+2017/07/13 11:37:58 dumper.go:79: Finished dumping table "gpw_domains" (2064462 rows, 75419359 bytes) in 3m51.824757927s
+2017/07/13 11:37:58 dumper.go:33: Starting dumping table "gpw_google_place_history"
+2017/07/13 11:45:50 dumper.go:79: Finished dumping table "gpw_customer_reviews" (5615626 rows, 1957740703 bytes) in 25m18.980996788s
+2017/07/13 11:45:50 dumper.go:33: Starting dumping table "gpw_report_runs"
+2017/07/13 11:46:21 dumper.go:79: Finished dumping table "gpw_report_runs" (380159 rows, 52874779 bytes) in 30.528644906s
+2017/07/13 11:46:21 dumper.go:33: Starting dumping table "gpw_reports"
+2017/07/13 11:46:29 dumper.go:79: Finished dumping table "gpw_reports" (68796 rows, 30399900 bytes) in 8.315538812s
+2017/07/13 11:46:29 dumper.go:33: Starting dumping table "gpw_search_competitors"
+2017/07/13 11:48:41 dumper.go:79: Finished dumping table "gpw_search_competitors" (4264341 rows, 150527512 bytes) in 2m11.579344613s
+2017/07/13 11:48:41 dumper.go:33: Starting dumping table "gpw_search_terms"
+2017/07/13 11:48:58 dumper.go:79: Finished dumping table "gpw_search_terms" (533135 rows, 24883219 bytes) in 16.723505032s
+2017/07/13 11:48:58 dumper.go:33: Starting dumping table "invoices"
+2017/07/13 11:48:59 dumper.go:79: Finished dumping table "invoices" (8124 rows, 201930 bytes) in 285.643038ms
+2017/07/13 11:48:59 dumper.go:33: Starting dumping table "ip_blacklist"
+2017/07/13 11:48:59 dumper.go:79: Finished dumping table "ip_blacklist" (46 rows, 4672 bytes) in 1.016011ms
+2017/07/13 11:48:59 dumper.go:33: Starting dumping table "ld_stats"
+2017/07/13 11:48:59 dumper.go:79: Finished dumping table "ld_stats" (71 rows, 1947 bytes) in 1.144955ms
+2017/07/13 11:48:59 dumper.go:33: Starting dumping table "ld_test_report_results"
+2017/07/13 11:49:00 dumper.go:79: Finished dumping table "ld_test_report_results" (3360 rows, 159414 bytes) in 82.962068ms
+2017/07/13 11:49:00 dumper.go:33: Starting dumping table "ld_test_reports"
+2017/07/13 11:49:00 dumper.go:79: Finished dumping table "ld_test_reports" (280 rows, 11272 bytes) in 1.99677ms
+2017/07/13 11:49:00 dumper.go:33: Starting dumping table "ld_tests"
+2017/07/13 11:49:00 dumper.go:79: Finished dumping table "ld_tests" (62 rows, 37180 bytes) in 3.442499ms
+2017/07/13 11:49:00 dumper.go:33: Starting dumping table "live_demo_attendances"
+2017/07/13 11:49:01 dumper.go:79: Finished dumping table "live_demo_attendances" (532 rows, 37039 bytes) in 50.102003ms
+2017/07/13 11:49:01 dumper.go:33: Starting dumping table "location_dashboard_primary_reports"
+2017/07/13 11:49:01 dumper.go:79: Finished dumping table "location_dashboard_primary_reports" (709 rows, 17368 bytes) in 4.504879ms
+2017/07/13 11:49:01 dumper.go:33: Starting dumping table "location_dashboard_settings"
+2017/07/13 11:49:15 dumper.go:79: Finished dumping table "location_dashboard_settings" (330850 rows, 26702116 bytes) in 14.802905402s
+2017/07/13 11:49:15 dumper.go:33: Starting dumping table "login_tokens"
+2017/07/13 11:49:16 dumper.go:79: Finished dumping table "login_tokens" (946 rows, 197570 bytes) in 44.512136ms
+2017/07/13 11:49:16 dumper.go:33: Starting dumping table "lsrc_campaign_history"
+2017/07/13 12:17:19 dumper.go:79: Finished dumping table "lsrc_campaign_history" (6736865 rows, 6767976198 bytes) in 28m3.698449246s
+2017/07/13 12:17:19 dumper.go:33: Starting dumping table "lsrc_campaign_history_competitors"
+2017/07/13 12:17:39 dumper.go:79: Finished dumping table "lsrc_campaign_history_competitors" (811064 rows, 50962893 bytes) in 18.937121409s
+2017/07/13 12:17:39 dumper.go:33: Starting dumping table "lsrc_campaign_keyword_group_keywords"
+2017/07/13 12:17:40 dumper.go:79: Finished dumping table "lsrc_campaign_keyword_group_keywords" (12663 rows, 216586 bytes) in 1.408551042s
+2017/07/13 12:17:40 dumper.go:33: Starting dumping table "lsrc_campaign_keyword_groups"
+2017/07/13 12:17:40 dumper.go:79: Finished dumping table "lsrc_campaign_keyword_groups" (1167 rows, 39284 bytes) in 18.34197ms
+2017/07/13 12:17:40 dumper.go:33: Starting dumping table "lsrc_campaign_keywords"
+2017/07/13 12:21:31 dumper.go:79: Finished dumping table "gpw_google_place_history" (4501547 rows, 4067654566 bytes) in 43m33.565221828s
+2017/07/13 12:21:31 dumper.go:33: Starting dumping table "lsrc_campaign_keywords_extra_results"
+2017/07/13 12:23:15 dumper.go:79: Finished dumping table "ct_competitor_citations" (90156817 rows, 9860721741 bytes) in 1h25m44.995952485s
+2017/07/13 12:23:15 dumper.go:33: Starting dumping table "lsrc_campaign_location"
+2017/07/13 12:23:23 dumper.go:79: Finished dumping table "lsrc_campaign_location" (200196 rows, 7909878 bytes) in 7.242837852s
+2017/07/13 12:23:23 dumper.go:33: Starting dumping table "lsrc_campaign_tags"
+2017/07/13 12:23:35 dumper.go:79: Finished dumping table "lsrc_campaign_tags" (273880 rows, 15239205 bytes) in 12.318695049s
+2017/07/13 12:23:35 dumper.go:33: Starting dumping table "lsrc_campaign_tune"
+2017/07/13 12:23:36 dumper.go:79: Finished dumping table "lsrc_campaign_tune" (8564 rows, 214386 bytes) in 893.777845ms
+2017/07/13 12:23:36 dumper.go:33: Starting dumping table "lsrc_campaigns"
+2017/07/13 12:24:13 dumper.go:79: Finished dumping table "lsrc_campaign_keywords" (5919080 rows, 408737992 bytes) in 6m32.794328791s
+2017/07/13 12:24:13 dumper.go:33: Starting dumping table "lsrc_competitor_rankings"
+2017/07/13 12:24:30 dumper.go:79: Finished dumping table "lsrc_campaigns" (340493 rows, 346120754 bytes) in 54.147667779s
+2017/07/13 12:24:30 dumper.go:33: Starting dumping table "lsrc_competitor_top_rankings"
+2017/07/13 12:26:52 dumper.go:79: Finished dumping table "gpw_citations_v3" (83039076 rows, 12754540575 bytes) in 1h19m28.777010821s
+2017/07/13 12:26:52 dumper.go:33: Starting dumping table "lsrc_competitors"
+2017/07/13 12:26:54 dumper.go:79: Finished dumping table "lsrc_competitors" (52666 rows, 5370934 bytes) in 1.677476489s
+2017/07/13 12:26:54 dumper.go:33: Starting dumping table "lsrc_customer_adhoc_runs"
+2017/07/13 12:27:09 dumper.go:79: Finished dumping table "lsrc_customer_adhoc_runs" (226374 rows, 5530649 bytes) in 14.193649433s
+2017/07/13 12:27:09 dumper.go:33: Starting dumping table "lsrc_field_counts"
+2017/07/13 12:27:16 dumper.go:79: Finished dumping table "lsrc_field_counts" (351416 rows, 12347021 bytes) in 7.573859208s
+2017/07/13 12:27:16 dumper.go:33: Starting dumping table "lsrc_match_settings"
+2017/07/13 12:27:16 dumper.go:79: Finished dumping table "lsrc_match_settings" (426 rows, 7538 bytes) in 4.747562ms
+2017/07/13 12:27:16 dumper.go:33: Starting dumping table "lsrc_ranking_positions_by_history"
+2017/07/13 12:31:05 dumper.go:79: Finished dumping table "lsrc_campaign_keywords_extra_results" (24893973 rows, 1719522494 bytes) in 9m33.795687681s
+2017/07/13 12:31:05 dumper.go:33: Starting dumping table "lsrc_ranking_positions_by_month"
+2017/07/13 12:48:12 dumper.go:79: Finished dumping table "lsrc_ranking_positions_by_month" (15424626 rows, 1325137583 bytes) in 17m6.473563415s
+2017/07/13 12:48:12 dumper.go:33: Starting dumping table "lsrc_ranking_positions_by_week"
+2017/07/13 13:23:38 dumper.go:79: Finished dumping table "ct2_ct_citations" (134234247 rows, 19855098572 bytes) in 2h27m21.124919069s
+2017/07/13 13:23:38 dumper.go:33: Starting dumping table "lsrc_rankings"
+2017/07/13 13:23:38 dumper.go:79: Finished dumping table "lsrc_rankings" (0 rows, 0 bytes) in 6.98µs
+2017/07/13 13:23:38 dumper.go:33: Starting dumping table "lsrc_rankings_search_engines"
+2017/07/13 13:24:48 dumper.go:79: Finished dumping table "lsrc_rankings_search_engines" (1159811 rows, 24026276 bytes) in 1m10.108447104s
+2017/07/13 13:24:48 dumper.go:33: Starting dumping table "lsrc_rankings_search_terms"
+2017/07/13 13:30:48 dumper.go:79: Finished dumping table "lsrc_competitor_top_rankings" (52327845 rows, 13405687536 bytes) in 1h6m17.976766567s
+2017/07/13 13:30:48 dumper.go:33: Starting dumping table "lsrc_rankings_shard_1"
+2017/07/13 13:34:02 dumper.go:79: Finished dumping table "lsrc_rankings_search_terms" (5885092 rows, 199540309 bytes) in 9m13.871664797s
+2017/07/13 13:34:02 dumper.go:33: Starting dumping table "lsrc_rankings_shard_10"
+2017/07/13 13:35:16 dumper.go:79: Finished dumping table "lsrc_ranking_positions_by_history" (26435769 rows, 1459252001 bytes) in 1h7m59.589585163s
+2017/07/13 13:35:16 dumper.go:33: Starting dumping table "lsrc_rankings_shard_2"
+2017/07/13 13:42:37 dumper.go:79: Finished dumping table "google_place_citations" (104163505 rows, 3476695402 bytes) in 2h36m43.834350858s
+2017/07/13 13:42:37 dumper.go:33: Starting dumping table "lsrc_rankings_shard_3"
+2017/07/13 14:39:16 dumper.go:79: Finished dumping table "lsrc_competitor_rankings" (103601314 rows, 25164844796 bytes) in 2h15m2.539018019s
+2017/07/13 14:39:16 dumper.go:33: Starting dumping table "lsrc_rankings_shard_4"
+2017/07/13 16:14:39 dumper.go:79: Finished dumping table "gpw_competitor_citations" (462254021 rows, 15702397736 bytes) in 4h55m7.9751534s
+2017/07/13 16:14:39 dumper.go:33: Starting dumping table "lsrc_rankings_shard_5"
+2017/07/13 16:31:12 dumper.go:79: Finished dumping table "lsrc_rankings_shard_3" (76648234 rows, 24685147064 bytes) in 2h48m35.127910584s
+2017/07/13 16:31:12 dumper.go:33: Starting dumping table "lsrc_rankings_shard_6"
+2017/07/13 17:11:32 dumper.go:79: Finished dumping table "lsrc_rankings_shard_10" (104382858 rows, 33312077828 bytes) in 3h37m29.905070005s
+2017/07/13 17:11:32 dumper.go:33: Starting dumping table "lsrc_rankings_shard_7"
+2017/07/13 17:13:26 dumper.go:79: Finished dumping table "lsrc_rankings_shard_4" (76900040 rows, 24096087093 bytes) in 2h34m9.652845081s
+2017/07/13 17:13:26 dumper.go:33: Starting dumping table "lsrc_rankings_shard_8"
+2017/07/13 17:17:14 dumper.go:79: Finished dumping table "lsrc_rankings_shard_2" (110492778 rows, 36577151922 bytes) in 3h41m57.568328869s
+2017/07/13 17:17:14 dumper.go:33: Starting dumping table "lsrc_rankings_shard_9"
+2017/07/13 18:04:30 dumper.go:79: Finished dumping table "lsrc_rankings_shard_1" (144171187 rows, 47010861673 bytes) in 4h33m41.359219114s
+2017/07/13 18:04:30 dumper.go:33: Starting dumping table "lsrc_ru_report_campaigns"
+2017/07/13 18:04:32 dumper.go:79: Finished dumping table "lsrc_ru_report_campaigns" (216330 rows, 3386134 bytes) in 1.834705473s
+2017/07/13 18:04:32 dumper.go:33: Starting dumping table "lsrc_ru_report_leaderboards"
+2017/07/13 18:04:51 dumper.go:79: Finished dumping table "lsrc_ru_report_leaderboards" (240635 rows, 46248309 bytes) in 19.648415547s
+2017/07/13 18:04:51 dumper.go:33: Starting dumping table "lsrc_ru_report_search_term_rankings"
+2017/07/13 18:10:19 dumper.go:79: Finished dumping table "lsrc_ru_report_search_term_rankings" (3084334 rows, 772186879 bytes) in 5m27.684569101s
+2017/07/13 18:10:19 dumper.go:33: Starting dumping table "lsrc_ru_report_search_term_rankings_by_groups"
+2017/07/13 18:10:27 dumper.go:79: Finished dumping table "lsrc_ru_report_search_term_rankings_by_groups" (484918 rows, 7652991 bytes) in 7.678930544s
+2017/07/13 18:10:27 dumper.go:33: Starting dumping table "lsrc_ru_report_search_term_rankings_groups"
+2017/07/13 18:10:27 dumper.go:79: Finished dumping table "lsrc_ru_report_search_term_rankings_groups" (725 rows, 23411 bytes) in 10.246878ms
+2017/07/13 18:10:27 dumper.go:33: Starting dumping table "lsrc_ru_reports"
+2017/07/13 18:10:28 dumper.go:79: Finished dumping table "lsrc_ru_reports" (2724 rows, 563541 bytes) in 464.409001ms
+2017/07/13 18:10:28 dumper.go:33: Starting dumping table "lsrc_scheduled_block_items"
+2017/07/13 18:12:41 dumper.go:79: Finished dumping table "lsrc_scheduled_block_items" (2306844 rows, 226058637 bytes) in 2m13.265805755s
+2017/07/13 18:12:41 dumper.go:33: Starting dumping table "lsrc_scheduled_blocks"
+2017/07/13 18:12:42 dumper.go:79: Finished dumping table "lsrc_scheduled_blocks" (8019 rows, 828305 bytes) in 655.04205ms
+2017/07/13 18:12:42 dumper.go:33: Starting dumping table "lsrc_screenshot_settings"
+2017/07/13 18:12:43 dumper.go:79: Finished dumping table "lsrc_screenshot_settings" (779 rows, 64020 bytes) in 18.340364ms
+2017/07/13 18:12:43 dumper.go:33: Starting dumping table "lsrc_screenshots"
+2017/07/13 18:52:07 dumper.go:79: Finished dumping table "lsrc_rankings_shard_5" (73704406 rows, 23120987773 bytes) in 2h37m28.515596054s
+2017/07/13 18:52:07 dumper.go:33: Starting dumping table "lsrc_search_query_summaries"
+2017/07/13 18:54:34 dumper.go:79: Finished dumping table "lsrc_search_query_summaries" (6089591 rows, 319943049 bytes) in 2m27.165924025s
+2017/07/13 18:54:34 dumper.go:33: Starting dumping table "lsrc_summary_profile_campaigns"
+2017/07/13 18:54:35 dumper.go:79: Finished dumping table "lsrc_summary_profile_campaigns" (32958 rows, 701927 bytes) in 282.948322ms
+2017/07/13 18:54:35 dumper.go:33: Starting dumping table "lsrc_summary_profile_report_types"
+2017/07/13 18:54:35 dumper.go:79: Finished dumping table "lsrc_summary_profile_report_types" (2 rows, 342 bytes) in 1.164996ms
+2017/07/13 18:54:35 dumper.go:33: Starting dumping table "lsrc_summary_profiles"
+2017/07/13 18:54:35 dumper.go:79: Finished dumping table "lsrc_summary_profiles" (435 rows, 59125 bytes) in 30.027337ms
+2017/07/13 18:54:35 dumper.go:33: Starting dumping table "lsrc_summary_profiles_history"
+2017/07/13 18:54:39 dumper.go:79: Finished dumping table "lsrc_summary_profiles_history" (65635 rows, 13881537 bytes) in 3.855821276s
+2017/07/13 18:54:39 dumper.go:33: Starting dumping table "lsrc_summary_stats"
+2017/07/13 19:11:08 dumper.go:79: Finished dumping table "lsrc_rankings_shard_9" (76199874 rows, 22973865740 bytes) in 1h53m54.458871174s
+2017/07/13 19:11:08 dumper.go:33: Starting dumping table "lsrc_top_rankings"
+2017/07/13 19:11:08 dumper.go:79: Finished dumping table "lsrc_top_rankings" (0 rows, 0 bytes) in 9.434µs
+2017/07/13 19:11:08 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_1"
+2017/07/13 19:12:40 dumper.go:79: Finished dumping table "lsrc_rankings_shard_8" (87122311 rows, 27621511406 bytes) in 1h59m14.828062823s
+2017/07/13 19:12:40 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_10"
+2017/07/13 19:17:29 dumper.go:79: Finished dumping table "lsrc_rankings_shard_7" (66945332 rows, 21110743895 bytes) in 2h5m56.912909332s
+2017/07/13 19:17:29 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_2"
+2017/07/13 20:21:19 dumper.go:79: Finished dumping table "lsrc_screenshots" (97083540 rows, 18968030623 bytes) in 2h5m44.31624363s
+2017/07/13 20:21:19 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_3"
+2017/07/13 20:39:43 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_10" (54998779 rows, 17000006527 bytes) in 1h27m2.232572901s
+2017/07/13 20:39:43 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_4"
+2017/07/13 21:12:30 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_2" (68257010 rows, 22100119335 bytes) in 1h55m0.382125781s
+2017/07/13 21:12:30 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_5"
+2017/07/13 21:15:45 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_1" (82982847 rows, 25288739551 bytes) in 2h4m36.529839711s
+2017/07/13 21:15:45 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_6"
+2017/07/13 22:00:43 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_3" (47557419 rows, 14375134768 bytes) in 1h39m24.064167054s
+2017/07/13 22:00:43 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_7"
+2017/07/13 22:03:44 dumper.go:79: Finished dumping table "lsrc_summary_stats" (33704655 rows, 3588531673 bytes) in 3h9m4.871682778s
+2017/07/13 22:03:44 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_8"
+2017/07/13 22:35:36 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_4" (51732071 rows, 15580924136 bytes) in 1h55m52.576564521s
+2017/07/13 22:35:36 dumper.go:33: Starting dumping table "lsrc_top_rankings_shard_9"
+2017/07/13 22:46:20 dumper.go:79: Finished dumping table "lsrc_rankings_shard_6" (144346805 rows, 46401963411 bytes) in 6h15m7.218164366s
+2017/07/13 22:46:20 dumper.go:33: Starting dumping table "majestic_rankings"
+2017/07/13 22:46:35 dumper.go:79: Finished dumping table "majestic_rankings" (506921 rows, 24944819 bytes) in 15.275069217s
+2017/07/13 22:46:35 dumper.go:33: Starting dumping table "migrations"
+2017/07/13 22:46:43 dumper.go:79: Finished dumping table "migrations" (771 rows, 8313578 bytes) in 7.648281455s
+2017/07/13 22:46:43 dumper.go:33: Starting dumping table "moz_ranking"
+2017/07/13 22:59:31 dumper.go:79: Finished dumping table "moz_ranking" (8496567 rows, 754889524 bytes) in 12m47.030825441s
+2017/07/13 22:59:31 dumper.go:33: Starting dumping table "onboarding_log"
+2017/07/13 22:59:34 dumper.go:79: Finished dumping table "onboarding_log" (6392 rows, 2795553 bytes) in 2.558595915s
+2017/07/13 22:59:34 dumper.go:33: Starting dumping table "options"
+2017/07/13 22:59:34 dumper.go:79: Finished dumping table "options" (72 rows, 3039 bytes) in 1.859176ms
+2017/07/13 22:59:34 dumper.go:33: Starting dumping table "payments"
+2017/07/13 22:59:35 dumper.go:79: Finished dumping table "payments" (2990 rows, 300609 bytes) in 530.731365ms
+2017/07/13 22:59:35 dumper.go:33: Starting dumping table "payments_credit_card_token"
+2017/07/13 22:59:36 dumper.go:79: Finished dumping table "payments_credit_card_token" (4112 rows, 232142 bytes) in 1.312740205s
+2017/07/13 22:59:36 dumper.go:33: Starting dumping table "paypal_ipn_notifications"
+2017/07/13 22:59:56 dumper.go:79: Finished dumping table "paypal_ipn_notifications" (100907 rows, 48600713 bytes) in 19.411794343s
+2017/07/13 22:59:56 dumper.go:33: Starting dumping table "profile_batch"
+2017/07/13 23:06:25 dumper.go:79: Finished dumping table "profile_batch" (1261282 rows, 1456111285 bytes) in 6m28.228704762s
+2017/07/13 23:06:25 dumper.go:33: Starting dumping table "proxy_domains"
+2017/07/13 23:06:25 dumper.go:79: Finished dumping table "proxy_domains" (35 rows, 1161 bytes) in 611.115µs
+2017/07/13 23:06:25 dumper.go:33: Starting dumping table "proxy_stats"
+2017/07/13 23:06:26 dumper.go:79: Finished dumping table "proxy_stats" (40 rows, 4027 bytes) in 1.005396ms
+2017/07/13 23:06:26 dumper.go:33: Starting dumping table "proxy_tags"
+2017/07/13 23:06:26 dumper.go:79: Finished dumping table "proxy_tags" (0 rows, 0 bytes) in 9.806µs
+2017/07/13 23:06:26 dumper.go:33: Starting dumping table "proxy_users"
+2017/07/13 23:06:26 dumper.go:79: Finished dumping table "proxy_users" (75 rows, 2499 bytes) in 2.377229ms
+2017/07/13 23:06:26 dumper.go:33: Starting dumping table "rb_buttons"
+2017/07/13 23:06:29 dumper.go:79: Finished dumping table "rb_buttons" (7839 rows, 5558974 bytes) in 2.411375784s
+2017/07/13 23:06:29 dumper.go:33: Starting dumping table "rb_directories"
+2017/07/13 23:07:17 dumper.go:79: Finished dumping table "rb_directories" (87053 rows, 35094048 bytes) in 47.661469957s
+2017/07/13 23:07:17 dumper.go:33: Starting dumping table "rb_embeds"
+2017/07/13 23:08:59 dumper.go:79: Finished dumping table "rb_embeds" (1366171 rows, 192733696 bytes) in 1m42.108004114s
+2017/07/13 23:08:59 dumper.go:33: Starting dumping table "rb_wl_profiles"
+2017/07/13 23:09:00 dumper.go:79: Finished dumping table "rb_wl_profiles" (1611 rows, 583229 bytes) in 840.717252ms
+2017/07/13 23:09:00 dumper.go:33: Starting dumping table "report_reruns"
+2017/07/13 23:09:00 dumper.go:79: Finished dumping table "report_reruns" (9 rows, 833 bytes) in 497.357µs
+2017/07/13 23:09:00 dumper.go:33: Starting dumping table "review_biz_click_tracking"
+2017/07/13 23:09:02 dumper.go:79: Finished dumping table "review_biz_click_tracking" (25152 rows, 3615071 bytes) in 2.25537683s
+2017/07/13 23:09:02 dumper.go:33: Starting dumping table "review_biz_directories"
+2017/07/13 23:09:03 dumper.go:79: Finished dumping table "review_biz_directories" (28 rows, 2014 bytes) in 1.416283ms
+2017/07/13 23:09:03 dumper.go:33: Starting dumping table "review_biz_directory_categories"
+2017/07/13 23:09:03 dumper.go:79: Finished dumping table "review_biz_directory_categories" (6 rows, 138 bytes) in 235.586µs
+2017/07/13 23:09:03 dumper.go:33: Starting dumping table "review_biz_directory_countries"
+2017/07/13 23:09:03 dumper.go:79: Finished dumping table "review_biz_directory_countries" (27 rows, 507 bytes) in 830.755µs
+2017/07/13 23:09:03 dumper.go:33: Starting dumping table "review_biz_directory_urls"
+2017/07/13 23:09:04 dumper.go:79: Finished dumping table "review_biz_directory_urls" (12380 rows, 1255876 bytes) in 1.145601082s
+2017/07/13 23:09:04 dumper.go:33: Starting dumping table "review_biz_dynamic_widgets"
+2017/07/13 23:09:04 dumper.go:79: Finished dumping table "review_biz_dynamic_widgets" (16 rows, 482 bytes) in 1.07135ms
+2017/07/13 23:09:04 dumper.go:33: Starting dumping table "review_biz_widget_directories"
+2017/07/13 23:09:06 dumper.go:79: Finished dumping table "review_biz_widget_directories" (12393 rows, 321935 bytes) in 675.119213ms
+2017/07/13 23:09:06 dumper.go:33: Starting dumping table "review_biz_widgets"
+2017/07/13 23:09:07 dumper.go:79: Finished dumping table "review_biz_widgets" (2119 rows, 241174 bytes) in 81.767184ms
+2017/07/13 23:09:07 dumper.go:33: Starting dumping table "rf_directories"
+2017/07/13 23:09:51 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_5" (46709696 rows, 13836451362 bytes) in 1h57m20.695749777s
+2017/07/13 23:09:51 dumper.go:33: Starting dumping table "rf_report_runs"
+2017/07/13 23:10:24 dumper.go:79: Finished dumping table "rf_report_runs" (692856 rows, 53245475 bytes) in 32.952217605s
+2017/07/13 23:10:24 dumper.go:33: Starting dumping table "rf_reports"
+2017/07/13 23:10:50 dumper.go:79: Finished dumping table "rf_reports" (30035 rows, 9681002 bytes) in 25.444930736s
+2017/07/13 23:10:50 dumper.go:33: Starting dumping table "rf_reviews"
+2017/07/13 23:14:34 dumper.go:79: Finished dumping table "rf_directories" (577566 rows, 159478893 bytes) in 5m27.303678803s
+2017/07/13 23:14:34 dumper.go:33: Starting dumping table "rf_reviews_runs"
+2017/07/13 23:20:54 dumper.go:79: Finished dumping table "rf_reviews_runs" (8335681 rows, 451587730 bytes) in 6m19.754690297s
+2017/07/13 23:20:54 dumper.go:33: Starting dumping table "script_run_log"
+2017/07/13 23:20:56 dumper.go:79: Finished dumping table "script_run_log" (9089 rows, 1137012 bytes) in 1.518833012s
+2017/07/13 23:20:56 dumper.go:33: Starting dumping table "scu_credit_bundles"
+2017/07/13 23:20:57 dumper.go:79: Finished dumping table "scu_credit_bundles" (5 rows, 83 bytes) in 258.532µs
+2017/07/13 23:20:57 dumper.go:33: Starting dumping table "scu_payg_report_credits"
+2017/07/13 23:20:57 dumper.go:79: Finished dumping table "scu_payg_report_credits" (4670 rows, 50720 bytes) in 212.664679ms
+2017/07/13 23:20:57 dumper.go:33: Starting dumping table "scu_report_ld_profile_urls"
+2017/07/13 23:26:31 dumper.go:79: Finished dumping table "rf_reviews" (3159900 rows, 1456721337 bytes) in 15m40.60492808s
+2017/07/13 23:26:31 dumper.go:33: Starting dumping table "scu_report_runs"
+2017/07/13 23:26:40 dumper.go:79: Finished dumping table "scu_report_runs" (136515 rows, 30912773 bytes) in 9.604877416s
+2017/07/13 23:26:40 dumper.go:33: Starting dumping table "scu_reports"
+2017/07/13 23:27:07 dumper.go:79: Finished dumping table "scu_reports" (93871 rows, 58614406 bytes) in 26.286162501s
+2017/07/13 23:27:07 dumper.go:33: Starting dumping table "selenium_sessions"
+2017/07/13 23:27:09 dumper.go:79: Finished dumping table "selenium_sessions" (1948 rows, 150308 bytes) in 681.903694ms
+2017/07/13 23:27:09 dumper.go:33: Starting dumping table "shard_mappings"
+2017/07/13 23:27:12 dumper.go:79: Finished dumping table "shard_mappings" (101454 rows, 6121287 bytes) in 2.561715894s
+2017/07/13 23:27:12 dumper.go:33: Starting dumping table "sign_up_answers"
+2017/07/13 23:27:14 dumper.go:79: Finished dumping table "sign_up_answers" (17524 rows, 1714120 bytes) in 2.531202412s
+2017/07/13 23:27:14 dumper.go:33: Starting dumping table "sphinx_counters"
+2017/07/13 23:27:14 dumper.go:79: Finished dumping table "sphinx_counters" (1 rows, 31 bytes) in 625.041µs
+2017/07/13 23:27:14 dumper.go:33: Starting dumping table "states"
+2017/07/13 23:27:15 dumper.go:79: Finished dumping table "states" (377 rows, 11607 bytes) in 5.15869ms
+2017/07/13 23:27:15 dumper.go:33: Starting dumping table "subscription_addons"
+2017/07/13 23:27:16 dumper.go:79: Finished dumping table "subscription_addons" (519 rows, 5626 bytes) in 4.182507ms
+2017/07/13 23:27:16 dumper.go:33: Starting dumping table "subscription_capabilities"
+2017/07/13 23:27:17 dumper.go:79: Finished dumping table "subscription_capabilities" (3127 rows, 122479 bytes) in 692.548145ms
+2017/07/13 23:27:17 dumper.go:33: Starting dumping table "subscription_combinations"
+2017/07/13 23:27:17 dumper.go:79: Finished dumping table "subscription_combinations" (90 rows, 2986 bytes) in 1.504049ms
+2017/07/13 23:27:17 dumper.go:33: Starting dumping table "subscriptions"
+2017/07/13 23:27:17 dumper.go:79: Finished dumping table "subscriptions" (183 rows, 21706 bytes) in 9.468201ms
+2017/07/13 23:27:17 dumper.go:33: Starting dumping table "templates"
+2017/07/13 23:27:17 dumper.go:79: Finished dumping table "templates" (7 rows, 109378 bytes) in 5.562499ms
+2017/07/13 23:27:17 dumper.go:33: Starting dumping table "test_directory_profiles"
+2017/07/13 23:27:19 dumper.go:79: Finished dumping table "test_directory_profiles" (626 rows, 876737 bytes) in 1.597841342s
+2017/07/13 23:27:19 dumper.go:33: Starting dumping table "tmp_rackspace_images_migration"
+2017/07/13 23:27:32 dumper.go:79: Finished dumping table "tmp_rackspace_images_migration" (199319 rows, 53179805 bytes) in 13.195485174s
+2017/07/13 23:27:32 dumper.go:33: Starting dumping table "tokens"
+2017/07/13 23:27:35 dumper.go:79: Finished dumping table "tokens" (20206 rows, 1488637 bytes) in 2.530181918s
+2017/07/13 23:27:35 dumper.go:33: Starting dumping table "twitter_account"
+2017/07/13 23:27:37 dumper.go:79: Finished dumping table "twitter_account" (3007 rows, 874050 bytes) in 1.550071637s
+2017/07/13 23:27:37 dumper.go:33: Starting dumping table "twitter_account_credentials"
+2017/07/13 23:27:38 dumper.go:79: Finished dumping table "twitter_account_credentials" (3007 rows, 368992 bytes) in 947.291333ms
+2017/07/13 23:27:38 dumper.go:33: Starting dumping table "twitter_account_location"
+2017/07/13 23:27:38 dumper.go:79: Finished dumping table "twitter_account_location" (3521 rows, 107477 bytes) in 56.693076ms
+2017/07/13 23:27:38 dumper.go:33: Starting dumping table "twitter_reply"
+2017/07/13 23:27:45 dumper.go:79: Finished dumping table "twitter_reply" (81419 rows, 18707629 bytes) in 6.37488509s
+2017/07/13 23:27:45 dumper.go:33: Starting dumping table "user_custom_settings"
+2017/07/13 23:27:45 dumper.go:79: Finished dumping table "user_custom_settings" (3439 rows, 153115 bytes) in 58.630847ms
+2017/07/13 23:27:45 dumper.go:33: Starting dumping table "user_ip_logs"
+2017/07/13 23:27:55 dumper.go:79: Finished dumping table "user_ip_logs" (187716 rows, 12916052 bytes) in 9.502843295s
+2017/07/13 23:27:55 dumper.go:33: Starting dumping table "user_ws_token"
+2017/07/13 23:27:55 dumper.go:79: Finished dumping table "user_ws_token" (34 rows, 1725 bytes) in 371.581µs
+2017/07/13 23:27:55 dumper.go:33: Starting dumping table "users"
+2017/07/13 23:28:05 dumper.go:79: Finished dumping table "users" (54742 rows, 13740976 bytes) in 9.829778135s
+2017/07/13 23:28:05 dumper.go:33: Starting dumping table "users_domain_whitelist"
+2017/07/13 23:28:05 dumper.go:79: Finished dumping table "users_domain_whitelist" (134 rows, 2860 bytes) in 1.891724ms
+2017/07/13 23:28:05 dumper.go:33: Starting dumping table "where_you_hear_about_us"
+2017/07/13 23:28:06 dumper.go:79: Finished dumping table "where_you_hear_about_us" (13359 rows, 779446 bytes) in 457.654392ms
+2017/07/13 23:28:06 dumper.go:33: Starting dumping table "white_label_profiles"
+2017/07/13 23:28:15 dumper.go:79: Finished dumping table "white_label_profiles" (9566 rows, 24796754 bytes) in 8.788432009s
+2017/07/13 23:31:55 dumper.go:79: Finished dumping table "scu_report_ld_profile_urls" (2051460 rows, 175191909 bytes) in 10m57.893325385s
+2017/07/13 23:37:00 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_7" (47874484 rows, 14786317108 bytes) in 1h36m16.947855451s
+2017/07/14 00:19:58 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_9" (55690877 rows, 16466751189 bytes) in 1h44m21.948033693s
+2017/07/14 00:25:38 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_8" (59591934 rows, 18293467584 bytes) in 2h21m53.133218839s
+2017/07/14 01:02:01 dumper.go:79: Finished dumping table "lsrc_top_rankings_shard_6" (114886004 rows, 37242467847 bytes) in 3h46m15.155745969s
+2017/07/14 07:58:44 dumper.go:79: Finished dumping table "lsrc_ranking_positions_by_week" (477952003 rows, 50845439226 bytes) in 19h10m32.174939989s
