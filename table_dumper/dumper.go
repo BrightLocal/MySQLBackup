@@ -15,6 +15,16 @@ type Config interface {
 	HasBackupLock() bool
 }
 
+type stats struct {
+	rows     int
+	bytes    int
+	duration time.Duration
+}
+
+func (s stats) Rows() int               { return s.rows }
+func (s stats) Bytes() int              { return s.bytes }
+func (s stats) Duration() time.Duration { return s.duration }
+
 type Dumper struct {
 	dsn       string
 	tableName string
@@ -29,55 +39,55 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 	}
 }
 
-func (d *Dumper) Run(w io.Writer) error {
+func (d *Dumper) Run(w io.Writer) (stats, error) {
+	s := stats{}
 	log.Printf("Starting dumping table %q", d.tableName)
 	conn, err := sqlx.Connect("mysql", d.dsn)
 	if err != nil {
-		return err
+		return s, err
 	}
 	defer conn.Close()
 	if d.config != nil && d.config.HasBackupLock() {
 		if _, err := conn.Exec("LOCK TABLES FOR BACKUP"); err != nil {
-			return err
+			return s, err
 		}
 		if _, err := conn.Exec("LOCK BINLOG FOR BACKUP"); err != nil {
-			return err
+			return s, err
 		}
 	}
-	if _, err := conn.Exec("START TRANSACTION /*!40108 WITH CONSISTENT SNAPSHOT */"); err != nil {
-		return err
+	if _, err := conn.Exec("START TRANSACTION WITH CONSISTENT SNAPSHOT"); err != nil {
+		return s, err
 	}
 	if d.config != nil && d.config.HasBackupLock() {
-		if _, err := conn.Exec("UNLOCK TABLES /* trx-only */"); err != nil {
-			return err
+		if _, err := conn.Exec("UNLOCK TABLES"); err != nil {
+			return s, err
 		}
 		if _, err := conn.Exec("UNLOCK BINLOG"); err != nil {
-			return err
+			return s, err
 		}
 	}
 	query := fmt.Sprintf("SELECT * FROM `%s`", d.tableName)
 	result, err := conn.Queryx(query)
 	if err != nil {
-		return err
+		return s, err
 	}
 	defer result.Close()
-	n := 0
-	totalBytes := 0
 	start := time.Now()
 	for result.Next() {
 		row, err := result.SliceScan()
 		if err != nil {
-			return err
+			return s, err
 		}
-		n++
+		s.rows++
 		b, err := w.Write([]byte(d.formatRow(row)))
 		if err != nil {
-			return err
+			return s, err
 		}
-		totalBytes += b
+		s.bytes += b
 	}
-	log.Printf("Finished dumping table %q (%d rows, %d bytes) in %s", d.tableName, n, totalBytes, time.Now().Sub(start).String())
-	return nil
+	s.duration = time.Now().Sub(start)
+	log.Printf("Finished dumping table %q (%d rows, %d bytes) in %s", d.tableName, s.Rows(), s.Bytes(), s.Duration().String())
+	return s, nil
 }
 
 func (d *Dumper) formatRow(row []interface{}) string {

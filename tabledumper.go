@@ -9,6 +9,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/BrightLocal/MySQLBackup/db_info"
 	"github.com/BrightLocal/MySQLBackup/dir_dumper"
@@ -76,7 +77,9 @@ func main() {
 		}
 		close(names)
 	}()
+	start := time.Now()
 	wp.Run(names)
+	dd.PrintStats(cfg.Streams, time.Now().Sub(start))
 }
 
 func (c *config) buildDSN() {

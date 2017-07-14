@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/user"
 	"strings"
+	"time"
 
 	"github.com/BrightLocal/MySQLBackup/table_dumper"
 	"github.com/pkg/sftp"
@@ -17,10 +18,19 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
+type DumpResult interface {
+	Rows() int
+	Bytes() int
+	Duration() time.Duration
+}
+
 type DirDumper struct {
-	dsn    string
-	dir    string
-	config table_dumper.Config
+	dsn           string
+	dir           string
+	config        table_dumper.Config
+	totalRows     int
+	totalBytes    int
+	totalDuration time.Duration
 }
 
 func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
@@ -40,9 +50,13 @@ func (d *DirDumper) Dump(tableName interface{}) {
 		log.Fatalf("Error getting writer: %s", err)
 	}
 	gzWriter := gzip.NewWriter(writer)
-	if err := td.Run(gzWriter); err != nil {
+	dumpResult, err := td.Run(gzWriter)
+	if err != nil {
 		log.Printf("Error running worker: %s", err)
 	}
+	d.totalBytes += dumpResult.Bytes()
+	d.totalRows += dumpResult.Rows()
+	d.totalDuration += dumpResult.Duration()
 	if err := gzWriter.Close(); err != nil {
 		log.Printf("Error closing compressor: %s", err)
 	}
@@ -105,4 +119,8 @@ func (d *DirDumper) getSFTPWriter(fileName string, where *url.URL) (io.WriteClos
 
 func (d *DirDumper) getFileWriter(fileName string) (io.WriteCloser, error) {
 	return os.Create(d.dir + "/" + fileName)
+}
+
+func (d DirDumper) PrintStats(streams int, totalDuration time.Duration) {
+	log.Printf("Dumped %d rows (%d bytes) using %d streams in %s (total run time %s)", d.totalRows, d.totalBytes, streams, d.totalDuration, totalDuration)
 }
