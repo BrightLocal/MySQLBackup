@@ -30,6 +30,7 @@ type config struct {
 	Dir        string
 	Streams    int
 	DSN        string
+	RunAfter   string
 }
 
 func main() {
@@ -43,6 +44,7 @@ func main() {
 	flag.StringVar(&cfg.Password, "password", "", "Password")
 	flag.StringVar(&cfg.SkipTables, "skip-tables", "", "Table names to skip")
 	flag.StringVar(&cfg.Dir, "dir", ".", "Destination directory path")
+	flag.StringVar(&cfg.RunAfter, "run-after", "", "Command to run after a file dump (%FILE_NAME% and %FILE_PATH% will be substituted)")
 	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to dump in parallel")
 	flag.Parse()
 	if cfg.Database == "" {
@@ -66,7 +68,9 @@ func main() {
 		log.Print("Database has no backup locks")
 	}
 	log.Printf("Will use %d streams", cfg.Streams)
-	dd := dir_dumper.NewDirDumper(cfg.DSN, cfg.Dir, dbInfo)
+	dd := dir_dumper.
+		NewDirDumper(cfg.DSN, cfg.Dir, dbInfo).
+		RunAfter(cfg.RunAfter)
 	wp := worker_pool.NewPool(cfg.Streams, dd.Dump)
 	names := make(chan interface{})
 	go func() {

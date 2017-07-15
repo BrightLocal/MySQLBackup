@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"os/exec"
 	"os/user"
 	"strings"
 	"time"
@@ -31,7 +32,10 @@ type DirDumper struct {
 	totalRows     int
 	totalBytes    int
 	totalDuration time.Duration
+	runAfter      string
 }
+
+const fileSuffix = ".csjson.bz2"
 
 func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
 	return &DirDumper{
@@ -41,10 +45,15 @@ func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
 	}
 }
 
+func (d *DirDumper) RunAfter(cmd string) *DirDumper {
+	d.runAfter = cmd
+	return d
+}
+
 func (d *DirDumper) Dump(tableName interface{}) {
 	name := tableName.(string)
 	td := table_dumper.NewTableDumper(d.dsn, name, d.config)
-	fileName := name + ".csjson.bz2" // comma separated JSON values, compressed
+	fileName := name + fileSuffix // comma separated JSON values, compressed
 	writer, err := d.getWriter(fileName)
 	if err != nil {
 		log.Fatalf("Error getting writer: %s", err)
@@ -62,6 +71,13 @@ func (d *DirDumper) Dump(tableName interface{}) {
 	}
 	if err := writer.Close(); err != nil {
 		log.Printf("Error closing file %q: %s", fileName, err)
+	}
+	if command := d.prepareCommand(fileName); command != "" {
+		if err := exec.Command("/bin/sh", "-c", command).Start(); err != nil {
+			log.Printf("Error starting command %q: %s", command, err)
+		} else {
+			log.Printf("Started command %q", command)
+		}
 	}
 }
 
@@ -123,4 +139,13 @@ func (d *DirDumper) getFileWriter(fileName string) (io.WriteCloser, error) {
 
 func (d DirDumper) PrintStats(streams int, totalDuration time.Duration) {
 	log.Printf("Dumped %d rows (%d bytes) using %d streams in %s (total run time %s)", d.totalRows, d.totalBytes, streams, d.totalDuration, totalDuration)
+}
+
+func (d DirDumper) prepareCommand(fileName string) string {
+	if d.runAfter == "" {
+		return ""
+	}
+	command := strings.Replace(d.runAfter, "%FILE_NAME%", fileName, -1)
+	command = strings.Replace(command, "%FILE_PATH%", d.dir+"/"+fileName, -1)
+	return command
 }
