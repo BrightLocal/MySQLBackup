@@ -17,7 +17,7 @@ Usage:
  -password=secret \
  -run-after=~/my-script.sh %FILE_PATH% # command to run after a table is dumped, %FILE_NAME% and %FILE_PATH% placeholders available
 ```
-A file will be created for each table using `table_name.csjson.gz` naming schema.
+A file will be created for each table using `table_name.csjson.bz2` naming schema.
 
 Each row will be a set of comma separated JSON encoded values:
 ```
