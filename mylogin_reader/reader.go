@@ -2,9 +2,11 @@ package mylogin_reader
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/dolmen-go/mylogin"
+	"github.com/go-ini/ini"
 )
 
 type Reader struct {
@@ -40,7 +42,32 @@ func (r *Reader) GetDSN(login string) (string, error) {
 		return "", err
 	}
 	if login := s.Login(login); login != nil {
+		if *login.Host == "localhost" || *login.Host == "127.0.0.1" {
+			if socket := FindSocketFile(); socket != "" {
+				login.Socket = &socket
+			}
+		}
 		return login.DSN(), nil
 	}
 	return "", fmt.Errorf("no sections found")
+}
+
+func FindSocketFile() string {
+	if cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, os.Getenv("HOME")+"/.my.cnf"); err == nil {
+		if socket, err := cfg.Section("client").GetKey("socket"); err == nil {
+			if _, err := os.Stat(socket.String()); !os.IsNotExist(err) {
+				return socket.String()
+			}
+			log.Printf("Socket is specified in ~/.my.cnf but not found in the file system")
+		}
+	}
+	if cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, "/etc/mysql/my.cnf"); err == nil {
+		if socket, err := cfg.Section("client").GetKey("socket"); err == nil {
+			if _, err := os.Stat(socket.String()); !os.IsNotExist(err) {
+				return socket.String()
+			}
+			log.Printf("Socket is specified in /etc/mysql/my.cnf but not found in the file system")
+		}
+	}
+	return ""
 }

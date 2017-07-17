@@ -13,7 +13,6 @@ import (
 	"github.com/BrightLocal/MySQLBackup/dir_dumper"
 	"github.com/BrightLocal/MySQLBackup/mylogin_reader"
 	"github.com/BrightLocal/MySQLBackup/worker_pool"
-	"github.com/go-ini/ini"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -115,7 +114,7 @@ func (c *config) buildDSN() {
 			)
 		} else {
 			if c.Hostname == "localhost" || c.Hostname == "127.0.0.1" {
-				if socket := c.findSocketFile(); socket != "" {
+				if socket := mylogin_reader.FindSocketFile(); socket != "" {
 					c.DSN = fmt.Sprintf(
 						"%s:%s@unix(%s)/",
 						c.Username,
@@ -142,24 +141,4 @@ func (c *config) buildDSN() {
 		os.Exit(1)
 	}
 	c.DSN += c.Database + "?charset=utf8"
-}
-
-func (c *config) findSocketFile() string {
-	if cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, os.Getenv("HOME")+"/.my.cnf"); err == nil {
-		if socket, err := cfg.Section("client").GetKey("socket"); err == nil {
-			if _, err := os.Stat(socket.String()); !os.IsNotExist(err) {
-				return socket.String()
-			}
-			log.Printf("Socket is specified in ~/.my.cnf but not found in the file system")
-		}
-	}
-	if cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, "/etc/mysql/my.cnf"); err == nil {
-		if socket, err := cfg.Section("client").GetKey("socket"); err == nil {
-			if _, err := os.Stat(socket.String()); !os.IsNotExist(err) {
-				return socket.String()
-			}
-			log.Printf("Socket is specified in /etc/mysql/my.cnf but not found in the file system")
-		}
-	}
-	return ""
 }
