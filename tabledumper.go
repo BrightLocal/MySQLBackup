@@ -1,7 +1,5 @@
 package main
 
-// Test dump run time: 10:55:57 - 07:58:44
-
 import (
 	"flag"
 	"fmt"
@@ -26,6 +24,7 @@ type config struct {
 	Login      string
 	Username   string
 	Password   string
+	Tables     string
 	SkipTables string
 	Dir        string
 	Streams    int
@@ -42,7 +41,8 @@ func main() {
 	flag.StringVar(&cfg.Login, "login-path", "", "Login path")
 	flag.StringVar(&cfg.Username, "username", "", "User name")
 	flag.StringVar(&cfg.Password, "password", "", "Password")
-	flag.StringVar(&cfg.SkipTables, "skip-tables", "", "Table names to skip")
+	flag.StringVar(&cfg.Tables, "tables", "", "Tables to dump (incompatible with -skip-tables)")
+	flag.StringVar(&cfg.SkipTables, "skip-tables", "", "Table names to skip (incompatible with -tables)")
 	flag.StringVar(&cfg.Dir, "dir", ".", "Destination directory path")
 	flag.StringVar(&cfg.RunAfter, "run-after", "", "Command to run after a file dump (%FILE_NAME% and %FILE_PATH% will be substituted)")
 	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to dump in parallel")
@@ -53,6 +53,10 @@ func main() {
 	}
 	cfg.buildDSN()
 	skipList := make(map[string]struct{})
+	if !(cfg.Tables == "" || cfg.SkipTables == "") {
+		flag.Usage()
+		return
+	}
 	if cfg.SkipTables != "" {
 		for _, t := range strings.Split(cfg.SkipTables, ",") {
 			skipList[strings.TrimSpace(t)] = struct{}{}
@@ -74,8 +78,16 @@ func main() {
 	wp := worker_pool.NewPool(cfg.Streams, dd.Dump)
 	names := make(chan interface{})
 	go func() {
-		for _, tableName := range dbInfo.Tables() {
-			if _, ok := skipList[tableName]; !ok {
+		if cfg.Tables == "" {
+			// all tables except skipped
+			for _, tableName := range dbInfo.Tables() {
+				if _, ok := skipList[tableName]; !ok {
+					names <- tableName
+				}
+			}
+		} else {
+			// specific tables only
+			for _, tableName := range strings.Split(cfg.Tables, ",") {
 				names <- tableName
 			}
 		}
