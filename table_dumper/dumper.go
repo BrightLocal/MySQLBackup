@@ -1,11 +1,11 @@
 package table_dumper
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -13,6 +13,7 @@ import (
 
 type Config interface {
 	HasBackupLock() bool
+	TableColumnType(string, int) string
 }
 
 type stats struct {
@@ -79,7 +80,7 @@ func (d *Dumper) Run(w io.Writer) (stats, error) {
 			return s, err
 		}
 		s.rows++
-		b, err := w.Write([]byte(d.formatRow(row)))
+		b, err := w.Write(d.compactRow(row))
 		if err != nil {
 			return s, err
 		}
@@ -90,8 +91,9 @@ func (d *Dumper) Run(w io.Writer) (stats, error) {
 	return s, nil
 }
 
-func (d *Dumper) formatRow(row []interface{}) string {
-	var result []string
+// @deprecated
+func (d *Dumper) formatRow(row []interface{}) []byte {
+	var result [][]byte
 	for col, r := range row {
 		switch val := r.(type) {
 		case []uint8:
@@ -99,12 +101,41 @@ func (d *Dumper) formatRow(row []interface{}) string {
 			if err != nil {
 				log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
 			}
-			result = append(result, string(out))
+			result = append(result, out)
 		case nil:
-			result = append(result, "null")
+			result = append(result, []byte("null"))
 		default:
 			log.Fatalf("Got unexpected type of column %d in table %s[%s]: %# v", col, d.tableName, string(row[0].([]byte)), r)
 		}
 	}
-	return strings.Join(result, ",") + "\n"
+	return append(bytes.Join(result, []byte(",")), []byte("\n")...)
+}
+
+func (d *Dumper) compactRow(row []interface{}) []byte {
+	var result [][]byte
+	for col, val := range row {
+		if val == nil {
+			result = append(result, []byte{})
+		} else {
+			switch d.config.TableColumnType(d.tableName, col) {
+			case "string":
+				out, err := json.Marshal(string(val.([]uint8)))
+				if err != nil {
+					log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
+				}
+				result = append(result, out)
+			case "binary":
+				out, err := json.Marshal(val)
+				if err != nil {
+					log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
+				}
+				result = append(result, out)
+			case "numeric":
+				result = append(result, []byte(val.([]uint8)))
+			default:
+				log.Fatalf("Unsupported column type %q for %s:%d", d.config.TableColumnType(d.tableName, col), d.tableName, col)
+			}
+		}
+	}
+	return append(bytes.Join(result, []byte(",")), []byte("\n")...)
 }

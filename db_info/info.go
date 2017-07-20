@@ -3,6 +3,8 @@ package db_info
 import (
 	"log"
 
+	"strings"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -13,11 +15,13 @@ type DBInfo struct {
 		checked bool
 		yes     bool
 	}
+	tableColumnTypes map[string][]string
 }
 
 func New(dsn string) (*DBInfo, error) {
 	i := &DBInfo{
-		dsn: dsn,
+		dsn:              dsn,
+		tableColumnTypes: make(map[string][]string),
 	}
 	return i, i.Ping()
 }
@@ -44,8 +48,101 @@ func (i *DBInfo) Tables() []string {
 			log.Fatalf("Error scanning: %s", err)
 		}
 		tables = append(tables, table)
+		i.tableColumnTypes[table] = i.tableColumns(table)
 	}
 	return tables
+}
+
+func (i *DBInfo) TableColumnType(tableName string, col int) string {
+	if table, ok := i.tableColumnTypes[tableName]; ok {
+		if col < len(table) {
+			return table[col]
+		}
+		log.Printf("There's no column %d in table %q", col, tableName)
+		return ""
+	}
+	log.Printf("There's no such table %q", tableName)
+	return ""
+}
+
+func (i *DBInfo) tableColumns(tableName string) []string {
+	result, err := i.conn.Queryx("SHOW COLUMNS FROM " + tableName)
+	if err != nil {
+		log.Fatalf("Error getting table %q columns: %s", tableName, err)
+	}
+	defer result.Close()
+	var cTypes []string
+	for result.Next() {
+		var (
+			fields []interface{}
+			err    error
+		)
+		if fields, err = result.SliceScan(); err != nil {
+			log.Fatalf("Error scanning: %s", err)
+		}
+		kind := string(fields[1].([]uint8))
+		switch {
+		// TODO bit type support?
+		// String ///
+		case strings.HasPrefix(kind, "varchar"):
+			fallthrough
+		case strings.HasPrefix(kind, "char"):
+			fallthrough
+		case strings.HasPrefix(kind, "text"):
+			fallthrough
+		case strings.HasPrefix(kind, "tinytext"):
+			fallthrough
+		case strings.HasPrefix(kind, "mediumtext"):
+			fallthrough
+		case strings.HasPrefix(kind, "longtext"):
+			fallthrough
+		case strings.HasPrefix(kind, "set"):
+			fallthrough
+		case strings.HasPrefix(kind, "enum"):
+			fallthrough
+		case strings.HasPrefix(kind, "date"):
+			fallthrough
+		case strings.HasPrefix(kind, "text"):
+			cTypes = append(cTypes, "string")
+		// Numeric ///
+		case strings.HasPrefix(kind, "int"):
+			fallthrough
+		case strings.HasPrefix(kind, "smallint"):
+			fallthrough
+		case strings.HasPrefix(kind, "tinyint"):
+			fallthrough
+		case strings.HasPrefix(kind, "mediumint"):
+			fallthrough
+		case strings.HasPrefix(kind, "bigint"):
+			fallthrough
+		case strings.HasPrefix(kind, "decimal"):
+			fallthrough
+		case strings.HasPrefix(kind, "numeric"):
+			fallthrough
+		case strings.HasPrefix(kind, "timestamp"):
+			fallthrough
+		case strings.HasPrefix(kind, "float"):
+			fallthrough
+		case strings.HasPrefix(kind, "double"):
+			cTypes = append(cTypes, "numeric")
+		// Binary ///
+		case strings.HasPrefix(kind, "binary"):
+			fallthrough
+		case strings.HasPrefix(kind, "varbinary"):
+			fallthrough
+		case strings.HasPrefix(kind, "blob"):
+			fallthrough
+		case strings.HasPrefix(kind, "tinyblob"):
+			fallthrough
+		case strings.HasPrefix(kind, "mediumblob"):
+			fallthrough
+		case strings.HasPrefix(kind, "longblob"):
+			cTypes = append(cTypes, "binary")
+		default:
+			log.Fatalf("Unsupported type %q", kind)
+		}
+	}
+	return cTypes
 }
 
 func (i *DBInfo) HasBackupLock() bool {

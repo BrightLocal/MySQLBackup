@@ -53,7 +53,7 @@ func (d *DirDumper) RunAfter(cmd string) *DirDumper {
 func (d *DirDumper) Dump(tableName interface{}) {
 	name := tableName.(string)
 	td := table_dumper.NewTableDumper(d.dsn, name, d.config)
-	fileName := name + fileSuffix // comma separated JSON values, compressed
+	fileName := name + fileSuffix
 	writer, err := d.getWriter(fileName)
 	if err != nil {
 		log.Fatalf("Error getting writer: %s", err)
@@ -62,6 +62,9 @@ func (d *DirDumper) Dump(tableName interface{}) {
 	dumpResult, err := td.Run(compressor)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)
+		compressor.Close()
+		writer.Close()
+		return
 	}
 	d.totalBytes += dumpResult.Bytes()
 	d.totalRows += dumpResult.Rows()
