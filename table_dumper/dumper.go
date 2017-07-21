@@ -1,7 +1,6 @@
 package table_dumper
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,6 +29,7 @@ type Dumper struct {
 	dsn       string
 	tableName string
 	config    Config
+	w         io.Writer
 }
 
 func NewTableDumper(dsn, tableName string, config Config) *Dumper {
@@ -40,33 +40,10 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 	}
 }
 
-func (d *Dumper) Run(w io.Writer) (stats, error) {
+func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
+	d.w = w
 	s := stats{}
 	log.Printf("Starting dumping table %q", d.tableName)
-	conn, err := sqlx.Connect("mysql", d.dsn)
-	if err != nil {
-		return s, err
-	}
-	defer conn.Close()
-	if d.config != nil && d.config.HasBackupLock() {
-		if _, err := conn.Exec("LOCK TABLES FOR BACKUP"); err != nil {
-			return s, err
-		}
-		if _, err := conn.Exec("LOCK BINLOG FOR BACKUP"); err != nil {
-			return s, err
-		}
-	}
-	if _, err := conn.Exec("START TRANSACTION WITH CONSISTENT SNAPSHOT"); err != nil {
-		return s, err
-	}
-	if d.config != nil && d.config.HasBackupLock() {
-		if _, err := conn.Exec("UNLOCK TABLES"); err != nil {
-			return s, err
-		}
-		if _, err := conn.Exec("UNLOCK BINLOG"); err != nil {
-			return s, err
-		}
-	}
 	query := fmt.Sprintf("SELECT * FROM `%s`", d.tableName)
 	result, err := conn.Queryx(query)
 	if err != nil {
@@ -80,7 +57,7 @@ func (d *Dumper) Run(w io.Writer) (stats, error) {
 			return s, err
 		}
 		s.rows++
-		b, err := w.Write(d.compactRow(row))
+		b, err := d.compactRow(row)
 		if err != nil {
 			return s, err
 		}
@@ -91,51 +68,39 @@ func (d *Dumper) Run(w io.Writer) (stats, error) {
 	return s, nil
 }
 
-// @deprecated
-func (d *Dumper) formatRow(row []interface{}) []byte {
-	var result [][]byte
-	for col, r := range row {
-		switch val := r.(type) {
-		case []uint8:
-			out, err := json.Marshal(string(val))
-			if err != nil {
-				log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
-			}
-			result = append(result, out)
-		case nil:
-			result = append(result, []byte("null"))
-		default:
-			log.Fatalf("Got unexpected type of column %d in table %s[%s]: %# v", col, d.tableName, string(row[0].([]byte)), r)
-		}
-	}
-	return append(bytes.Join(result, []byte(",")), []byte("\n")...)
-}
-
-func (d *Dumper) compactRow(row []interface{}) []byte {
-	var result [][]byte
+func (d *Dumper) compactRow(row []interface{}) (int, error) {
+	var n, b int
+	var err error
 	for col, val := range row {
-		if val == nil {
-			result = append(result, []byte{})
-		} else {
+		if val != nil {
 			switch d.config.TableColumnType(d.tableName, col) {
 			case "string":
 				out, err := json.Marshal(string(val.([]uint8)))
 				if err != nil {
 					log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
 				}
-				result = append(result, out)
+				b, err = d.w.Write(out)
+				n += b
 			case "binary":
 				out, err := json.Marshal(val)
 				if err != nil {
 					log.Fatalf("Error marshaling value of column %d in table %s[%s]: %s", col, d.tableName, string(row[0].([]byte)), err)
 				}
-				result = append(result, out)
+				b, err = d.w.Write(out)
+				n += b
 			case "numeric":
-				result = append(result, []byte(val.([]uint8)))
+				b, err = d.w.Write([]byte(val.([]uint8)))
+				n += b
 			default:
 				log.Fatalf("Unsupported column type %q for %s:%d", d.config.TableColumnType(d.tableName, col), d.tableName, col)
 			}
 		}
+		if col != len(row)-1 {
+			b, err = d.w.Write([]byte(","))
+			n += b
+		}
 	}
-	return append(bytes.Join(result, []byte(",")), []byte("\n")...)
+	b, err = d.w.Write([]byte("\n"))
+	n += b
+	return n, err
 }

@@ -2,7 +2,6 @@ package db_info
 
 import (
 	"log"
-
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -16,6 +15,14 @@ type DBInfo struct {
 		yes     bool
 	}
 	tableColumnTypes map[string][]string
+	masterStatus     struct {
+		File            string `db:"File"`
+		Position        int    `db:"Position"`
+		DoDB            string `db:"Binlog_Do_DB"`
+		IgnoreDB        string `db:"Binlog_Ignore_DB"`
+		ExecutedGtidSet string `db:"Executed_Gtid_Set"`
+	}
+	isMaster bool
 }
 
 func New(dsn string) (*DBInfo, error) {
@@ -51,6 +58,21 @@ func (i *DBInfo) Tables() []string {
 		i.tableColumnTypes[table] = i.tableColumns(table)
 	}
 	return tables
+}
+
+func (i *DBInfo) getMasterStatus() {
+	if result, err := i.conn.Queryx("SHOW MASTER STATUS"); err != nil {
+		log.Printf("Could not get master status: %s", err)
+	} else {
+		defer result.Close()
+		for result.Next() {
+			if err := result.StructScan(&i.masterStatus); err != nil {
+				log.Printf("Error scanning master status: %s", err)
+			}
+			i.isMaster = true
+			break
+		}
+	}
 }
 
 func (i *DBInfo) TableColumnType(tableName string, col int) string {

@@ -14,6 +14,7 @@ import (
 
 	"github.com/BrightLocal/MySQLBackup/table_dumper"
 	"github.com/dsnet/compress/bzip2"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -29,6 +30,7 @@ type DirDumper struct {
 	dsn           string
 	dir           string
 	config        table_dumper.Config
+	conn          *sqlx.DB
 	totalRows     int
 	totalBytes    int
 	totalDuration time.Duration
@@ -37,9 +39,8 @@ type DirDumper struct {
 
 const fileSuffix = ".csjson.bz2"
 
-func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
+func NewDirDumper(dir string, config table_dumper.Config) *DirDumper {
 	return &DirDumper{
-		dsn:    dsn,
 		dir:    dir,
 		config: config,
 	}
@@ -47,6 +48,28 @@ func NewDirDumper(dsn, dir string, config table_dumper.Config) *DirDumper {
 
 func (d *DirDumper) RunAfter(cmd string) *DirDumper {
 	d.runAfter = cmd
+	return d
+}
+
+func (d *DirDumper) Connect(dsn string) *DirDumper {
+	d.dsn = dsn
+	var err error
+	d.conn, err = sqlx.Connect("mysql", d.dsn)
+	if err != nil {
+		log.Fatalf("Error connecting: %s", err)
+	}
+	_, err = d.conn.Exec("START TRANSACTION WITH CONSISTENT SNAPSHOT")
+	if err != nil {
+		log.Fatalf("Error starting transaction: %s", err)
+	}
+	if d.config != nil && d.config.HasBackupLock() {
+		if _, err := d.conn.Exec("LOCK TABLES FOR BACKUP"); err != nil {
+			log.Fatalf("Error locking tables for backup: %s", err)
+		}
+		if _, err := d.conn.Exec("LOCK BINLOG FOR BACKUP"); err != nil {
+			log.Fatalf("Error locking binlog for backup: %s", err)
+		}
+	}
 	return d
 }
 
@@ -59,7 +82,7 @@ func (d *DirDumper) Dump(tableName interface{}) {
 		log.Fatalf("Error getting writer: %s", err)
 	}
 	compressor, _ := bzip2.NewWriter(writer, &bzip2.WriterConfig{Level: bzip2.BestCompression})
-	dumpResult, err := td.Run(compressor)
+	dumpResult, err := td.Run(compressor, d.conn)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)
 		compressor.Close()
