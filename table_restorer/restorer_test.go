@@ -6,18 +6,22 @@ import (
 	"testing"
 )
 
-var lines = []byte(`74,"field with \"escaped\" text","multi\nline\twith tabs",mb92a6b37b33644cd0f39b24efd8b1d038794b62a,,"2011-08-24 12:36:42",
-`)
-var expected = []string{
-	`74`,
-	`field with "escaped" text`,
-	`multi
+var (
+	lines = []byte(`74,-12.345,  ,"field with \"escaped\" text","","multi\nline\twith tabs",b92a6b37b33644cd0f39b24efd8b1d038794b62a,,"2011-08-24 12:36:42",`)
+	expected = []string{
+		`74`,
+		`-12.345`,
+		`  `,
+		`field with "escaped" text`,
+		``,
+		`multi
 line	with tabs`,
-	"mb92a6b37b33644cd0f39b24efd8b1d038794b62a",
-	"",
-	"2011-08-24 12:36:42",
-	"",
-}
+		`b92a6b37b33644cd0f39b24efd8b1d038794b62a`,
+		``,
+		`2011-08-24 12:36:42`,
+		``,
+	}
+)
 
 func TestLineParser(t *testing.T) {
 	r := NewReader(bytes.NewReader(lines))
