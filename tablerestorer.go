@@ -9,14 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BrightLocal/MySQLBackup/db_info"
-	"github.com/BrightLocal/MySQLBackup/dir_dumper"
+	"github.com/BrightLocal/MySQLBackup/dir_restorer"
 	"github.com/BrightLocal/MySQLBackup/mylogin_reader"
 	"github.com/BrightLocal/MySQLBackup/worker_pool"
-	_ "github.com/go-sql-driver/mysql"
 )
 
-type dumperConfig struct {
+type restorerConfig struct {
 	Hostname   string
 	Port       int
 	Database   string
@@ -28,23 +26,21 @@ type dumperConfig struct {
 	Dir        string
 	Streams    int
 	DSN        string
-	RunAfter   string
 }
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	cfg := &dumperConfig{}
+	cfg := &restorerConfig{}
 	flag.StringVar(&cfg.Hostname, "hostname", "localhost", "Host name")
 	flag.IntVar(&cfg.Port, "port", 3306, "Port number")
-	flag.StringVar(&cfg.Database, "database", "", "Database name to dump")
+	flag.StringVar(&cfg.Database, "database", "", "Database name to restore")
 	flag.StringVar(&cfg.Login, "login-path", "", "Login path")
 	flag.StringVar(&cfg.Username, "username", "", "User name")
 	flag.StringVar(&cfg.Password, "password", "", "Password")
-	flag.StringVar(&cfg.Tables, "tables", "", "Tables to dump (incompatible with -skip-tables)")
+	flag.StringVar(&cfg.Tables, "tables", "", "Tables to restore (incompatible with -skip-tables)")
 	flag.StringVar(&cfg.SkipTables, "skip-tables", "", "Table names to skip (incompatible with -tables)")
-	flag.StringVar(&cfg.Dir, "dir", ".", "Destination directory path")
-	flag.StringVar(&cfg.RunAfter, "run-after", "", "Command to run after a file dump (%FILE_NAME% and %FILE_PATH% will be substituted)")
-	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to dump in parallel")
+	flag.StringVar(&cfg.Dir, "dir", ".", "Source directory path")
+	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to restore in parallel")
 	flag.Parse()
 	if cfg.Database == "" {
 		flag.Usage()
@@ -61,26 +57,15 @@ func main() {
 			skipList[strings.TrimSpace(t)] = struct{}{}
 		}
 	}
-	dbInfo, err := db_info.New(cfg.DSN)
-	if err != nil {
-		log.Fatalf("Error connecting to %s: %s", cfg.DSN, err)
-	}
-	if dbInfo.HasBackupLock() {
-		log.Print("Database has backup locks")
-	} else {
-		log.Print("Database has no backup locks")
-	}
-	log.Printf("Will use %d streams", cfg.Streams)
-	dd := dir_dumper.
-		NewDirDumper(cfg.Dir, dbInfo).
-		Connect(cfg.DSN).
-		RunAfter(cfg.RunAfter)
-	wp := worker_pool.NewPool(cfg.Streams, dd.Dump)
+	dr := dir_restorer.
+		NewDirRestorer(cfg.Dir).
+		Connect(cfg.DSN)
+	wp := worker_pool.NewPool(cfg.Streams, dr.Restore)
 	names := make(chan interface{})
 	go func() {
 		if cfg.Tables == "" {
 			// all tables except skipped
-			for _, tableName := range dbInfo.Tables() {
+			for _, tableName := range dr.Tables() {
 				if _, ok := skipList[tableName]; !ok {
 					names <- tableName
 				}
@@ -95,10 +80,10 @@ func main() {
 	}()
 	start := time.Now()
 	wp.Run(names)
-	dd.PrintStats(cfg.Streams, time.Now().Sub(start))
+	dr.PrintStats(cfg.Streams, time.Now().Sub(start))
 }
 
-func (c *dumperConfig) buildDSN() {
+func (c *restorerConfig) buildDSN() {
 	if c.Login != "" {
 		var err error
 		c.DSN, err = mylogin_reader.Read().GetDSN(c.Login)

@@ -1,61 +1,61 @@
 package table_restorer
 
 import (
-	"bufio"
 	"io"
 	"log"
+	"strings"
+	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
-type LineReader struct {
-	r *bufio.Reader
+type stats struct {
+	rows     int
+	bytes    int
+	duration time.Duration
 }
 
-func NewReader(input io.Reader) *LineReader {
-	return &LineReader{
-		r: bufio.NewReader(input),
-	}
+func (s stats) Rows() int               { return s.rows }
+func (s stats) Bytes() int              { return s.bytes }
+func (s stats) Duration() time.Duration { return s.duration }
+
+type Restorer struct {
+	dsn       string
+	tableName string
+	columns   []string
+	colNum    int
+	query     string
 }
 
-func (r *LineReader) Parse(row chan []string) {
-	columns := []string{}
-	column := []rune{}
-	defer close(row)
-	for {
-		ru, _, err := r.r.ReadRune()
-		if err != nil {
-			if err != io.EOF {
-				log.Printf("Error reading: %s", err)
-			}
-			return
-		}
-		switch ru {
-		case '"':
-			column = append(column, ru)
-			for {
-				ru, _, err := r.r.ReadRune()
-				if err != nil {
-					if err != io.EOF {
-						log.Printf("Error reading: %s", err)
-					}
-					return
-				}
-				if ru == '"' {
-					column = append(column, ru)
-					break
-				} else {
-					column = append(column, ru)
-				}
-			}
-		case '\n':
-			columns = append(columns, string(column))
-			row <- columns
-			column = []rune{}
-			columns = []string{}
-		case ',':
-			columns = append(columns, string(column))
-			column = []rune{}
-		default:
-			column = append(column, ru)
-		}
+func New(dsn, tableName string, columns []string) *Restorer {
+	r := &Restorer{
+		dsn:       dsn,
+		tableName: tableName,
+		columns:   columns,
+		colNum:    len(columns),
 	}
+	r.query = "INSERT INTO `" + tableName + "` ("
+	cols := make([]string, len(columns), len(columns))
+	vals := make([]string, len(columns), len(columns))
+	for i, col := range columns {
+		cols[i] = "`" + col + "`"
+		vals[i] = "?"
+	}
+	r.query += strings.Join(cols, ",") + ") VALUES (" + strings.Join(vals, ",") + ")"
+	return r
+}
+
+func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
+	log.Printf("Restoring table %s: %s", r.tableName, strings.Join(r.columns, ", "))
+	log.Printf("%s", r.query)
+	l := NewReader(in)
+	rows := make(chan []string)
+	go l.Parse(rows)
+	for row := range rows {
+		if len(row) != r.colNum {
+			log.Fatalf("Column number in table %q mismatch, expected %d, got %d (%s)", r.tableName, r.colNum, len(row), row[0])
+		}
+		// TODO
+	}
+	return stats{}, nil
 }
