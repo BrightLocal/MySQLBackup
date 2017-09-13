@@ -10,6 +10,14 @@ var (
 	rTables = regexp.MustCompile("CREATE TABLE `([^`]+)`")
 )
 
+func FindTableCreate(sql []byte, tableName string) string {
+	m := regexp.MustCompile("CREATE TABLE `"+tableName+"`[^;]+;").FindAllSubmatch(sql, -1)
+	if len(m) > 0 && len(m[0]) > 0 {
+		return string(m[0][0])
+	}
+	return ""
+}
+
 func FindTableColumns(sql []byte, tableName string) []string {
 	rParser := regexp.MustCompile("CREATE TABLE `" + tableName + "`[^;]+;")
 	m := rParser.FindAllSubmatch(sql, -1)
@@ -24,5 +32,3 @@ func FindTableColumns(sql []byte, tableName string) []string {
 	}
 	return fields
 }
-
-

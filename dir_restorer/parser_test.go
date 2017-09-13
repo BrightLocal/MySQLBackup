@@ -3,7 +3,6 @@ package dir_restorer
 import (
 	"strings"
 	"testing"
-	"io/ioutil"
 )
 
 func TestParser(t *testing.T) {
@@ -52,23 +51,25 @@ func TestParser(t *testing.T) {
 	)
 	t.Logf("%s", strings.Join(FindTableColumns(in, "cb_tasks"), ", "))
 	t.Logf("%s", strings.Join(FindTableColumns(in, "chart_mogul_import"), ", "))
+	t.Logf("%s", FindTableCreate(in, "cb_tasks"))
 }
 
-func TestFindTables(t *testing.T) {
-	schema, err := ioutil.ReadFile("/home/wolf/schema.sql")
-	if err != nil {
-		t.Errorf("error reading file: %s", err)
-	}
-	t.Logf("%s", strings.Join(FindTables(schema), ", "))
-}
-
-func TestColumns(t *testing.T) {
-	schema, err := ioutil.ReadFile("/home/wolf/schema.sql")
-	if err != nil {
-		t.Errorf("error reading file: %s", err)
-	}
-	for _, table := range FindTables(schema) {
-		columns := FindTableColumns(schema, table)
-		t.Logf("%s: %s", table, strings.Join(columns, ","))
-	}
-}
+//
+//func TestFindTables(t *testing.T) {
+//	schema, err := ioutil.ReadFile("/home/wolf/schema.sql")
+//	if err != nil {
+//		t.Errorf("error reading file: %s", err)
+//	}
+//	t.Logf("%s", strings.Join(FindTables(schema), ", "))
+//}
+//
+//func TestColumns(t *testing.T) {
+//	schema, err := ioutil.ReadFile("/home/wolf/schema.sql")
+//	if err != nil {
+//		t.Errorf("error reading file: %s", err)
+//	}
+//	for _, table := range FindTables(schema) {
+//		columns := FindTableColumns(schema, table)
+//		t.Logf("%s: %s", table, strings.Join(columns, ","))
+//	}
+//}

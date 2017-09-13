@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/BrightLocal/MySQLBackup/table_restorer"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -24,12 +25,15 @@ import (
 
 type DirRestorer struct {
 	dsn           string
+	db            string
 	dir           string
 	schema        []byte
 	conn          *sqlx.DB
 	totalRows     int
 	totalBytes    int
 	totalDuration time.Duration
+	create        bool
+	truncate      bool
 }
 
 func NewDirRestorer(dir string) *DirRestorer {
@@ -43,14 +47,35 @@ func NewDirRestorer(dir string) *DirRestorer {
 	return r
 }
 
-func (d *DirRestorer) Connect(dsn string) *DirRestorer {
+func (d *DirRestorer) Connect(dsn, db string) *DirRestorer {
 	d.dsn = dsn
-	//var err error
-	//d.conn, err = sqlx.Connect("mysql", d.dsn)
-	//if err != nil {
-	//	log.Fatalf("Error connecting: %s", err)
-	//}
+	d.db = db
+	var err error
+	d.conn, err = sqlx.Connect("mysql", d.dsn)
+	if err != nil {
+		log.Fatalf("Error connecting: %s", err)
+	}
 	return d
+}
+
+func (d *DirRestorer) CreateTables(create bool) *DirRestorer {
+	d.create = create
+	return d
+}
+
+func (d *DirRestorer) TruncateTables(truncate bool) *DirRestorer {
+	d.truncate = truncate
+	return d
+}
+
+func (d *DirRestorer) Prepare() error {
+	_, err := d.conn.Exec("SET GLOBAL FOREIGN_KEY_CHECKS = 0")
+	return err
+}
+
+func (d *DirRestorer) Finish() error {
+	_, err := d.conn.Exec("SET GLOBAL FOREIGN_KEY_CHECKS = 1")
+	return err
 }
 
 func (d *DirRestorer) getReader(fileName string) (io.ReadCloser, error) {
@@ -140,6 +165,35 @@ func (d *DirRestorer) Restore(tableName interface{}) {
 	if decompressor == nil {
 		log.Printf("could not detect decompressing argo for file %q", fileName)
 		return
+	}
+	rows, err := d.conn.Query(
+		"SELECT `table_name` FROM `information_schema`.`tables` WHERE `table_schema`=? AND `table_name`=?",
+		d.db,
+		name,
+	)
+	if err != nil {
+		log.Fatalf("error checking if table exists: %s", err)
+	}
+	if rows.Next() {
+		if d.truncate {
+			log.Printf("Truncating table %s", name)
+			if _, err := d.conn.Exec("TRUNCATE TABLE `" + name + "`"); err != nil {
+				log.Fatalf("error clearing table %s: %s", name, err)
+			}
+		}
+	} else {
+		if d.create {
+			log.Printf("Creating table %s", name)
+			createQuery := FindTableCreate(d.schema, name)
+			if createQuery == "" {
+				log.Fatalf("could not find create statement for table %s", name)
+			}
+			if _, err := d.conn.Exec(createQuery); err != nil {
+				log.Fatalf("error creating table %s: %s", name, err)
+			}
+		} else {
+			log.Fatalf("table %s does not exist, and automatic creation not allowed", name)
+		}
 	}
 	tr := table_restorer.New(d.dsn, name, FindTableColumns(d.schema, name))
 	restoreResult, err := tr.Run(decompressor, d.conn)

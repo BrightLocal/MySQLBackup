@@ -47,15 +47,23 @@ func New(dsn, tableName string, columns []string) *Restorer {
 
 func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 	log.Printf("Restoring table %s: %s", r.tableName, strings.Join(r.columns, ", "))
-	log.Printf("%s", r.query)
+	statement, err := conn.Prepare(r.query)
+	if err != nil {
+		return stats{}, err
+	}
 	l := NewReader(in)
-	rows := make(chan []string)
+	rows := make(chan []interface{})
 	go l.Parse(rows)
 	for row := range rows {
 		if len(row) != r.colNum {
-			log.Fatalf("Column number in table %q mismatch, expected %d, got %d (%s)", r.tableName, r.colNum, len(row), row[0])
+			//log.Printf("Warning: column number in table %q mismatch, expected %d, got %d (%s)", r.tableName, r.colNum, len(row), row[0])
+			log.Fatalf("Warning: column number in table %q mismatch, expected %d, got %d (%s)", r.tableName, r.colNum, len(row), row[0])
+			continue
 		}
-		// TODO
+		if _, err := statement.Exec(row...); err != nil {
+			log.Printf("Warning: error executing query for table %s: %s\n%# v", r.tableName, err, row)
+			//log.Fatalf("Warning: error executing query for table %s: %s\n%# v", r.tableName, err, row)
+		}
 	}
 	return stats{}, nil
 }

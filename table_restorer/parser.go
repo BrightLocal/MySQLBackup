@@ -2,6 +2,7 @@ package table_restorer
 
 import (
 	"bufio"
+	"encoding/json"
 	"io"
 	"log"
 )
@@ -16,11 +17,10 @@ func NewReader(input io.Reader) *LineReader {
 	}
 }
 
-func (r *LineReader) Parse(row chan []string) {
-	columns := []string{}
+func (r *LineReader) Parse(row chan []interface{}) {
+	columns := []interface{}{}
 	column := []rune{}
 	defer func() {
-		log.Printf("Closing rows")
 		close(row)
 	}()
 	escaped := false
@@ -33,25 +33,30 @@ func (r *LineReader) Parse(row chan []string) {
 			return
 		}
 		switch ru {
-		case '"': // beginning a string in ""
+		case '"':
 			column = append(column, ru)
-			if !escaped { // not escaped: \"
-				for {
-					ru, _, err := r.r.ReadRune()
-					if err != nil {
-						if err != io.EOF {
-							log.Printf("Error reading: %s", err)
-						}
-						return
+			for {
+				ru, _, err := r.r.ReadRune()
+				if err != nil {
+					if err != io.EOF {
+						log.Printf("Error reading: %s", err)
 					}
-					if ru == '"' {
-						column = append(column, ru)
-						if !(len(column) > 1 && column[len(column)-2] == '\\') {
-							break
-						}
-					} else {
-						column = append(column, ru)
+					return
+				}
+				//log.Printf("> %s %v", string(ru), escaped)
+				if ru == '"' {
+					column = append(column, ru)
+					if !escaped {
+						escaped = false
+						break
 					}
+					escaped = !escaped
+				} else if ru == '\\' {
+					column = append(column, ru)
+					escaped = !escaped
+				} else {
+					column = append(column, ru)
+					escaped = false
 				}
 			}
 			escaped = false
@@ -59,13 +64,13 @@ func (r *LineReader) Parse(row chan []string) {
 			column = append(column, ru)
 			escaped = !escaped
 		case '\n': // end of line
-			columns = append(columns, string(column))
+			columns = append(columns, parseColumn(column))
 			row <- columns
 			column = []rune{}
-			columns = []string{}
+			columns = []interface{}{}
 			escaped = false
 		case ',': // new column
-			columns = append(columns, string(column))
+			columns = append(columns, parseColumn(column))
 			column = []rune{}
 			escaped = false
 		default: // just a character
@@ -73,4 +78,15 @@ func (r *LineReader) Parse(row chan []string) {
 			escaped = false
 		}
 	}
+}
+
+func parseColumn(in []rune) interface{} {
+	if len(in) == 0 {
+		return nil
+	}
+	var value interface{}
+	if err := json.Unmarshal([]byte(string(in)), &value); err != nil {
+		log.Fatalf("error unmarshalling %s: %s", string(in), err)
+	}
+	return value
 }

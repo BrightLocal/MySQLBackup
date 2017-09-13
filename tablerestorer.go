@@ -26,6 +26,8 @@ type restorerConfig struct {
 	Dir        string
 	Streams    int
 	DSN        string
+	Create     bool
+	Truncate   bool
 }
 
 func main() {
@@ -40,6 +42,8 @@ func main() {
 	flag.StringVar(&cfg.Tables, "tables", "", "Tables to restore (incompatible with -skip-tables)")
 	flag.StringVar(&cfg.SkipTables, "skip-tables", "", "Table names to skip (incompatible with -tables)")
 	flag.StringVar(&cfg.Dir, "dir", ".", "Source directory path")
+	flag.BoolVar(&cfg.Create, "create", false, "Create tables if they do not exist")
+	flag.BoolVar(&cfg.Truncate, "truncate", false, "Clear tables before restoring")
 	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to restore in parallel")
 	flag.Parse()
 	if cfg.Database == "" {
@@ -59,7 +63,12 @@ func main() {
 	}
 	dr := dir_restorer.
 		NewDirRestorer(cfg.Dir).
-		Connect(cfg.DSN)
+		Connect(cfg.DSN, cfg.Database).
+		CreateTables(cfg.Create).
+		TruncateTables(cfg.Truncate)
+	if err := dr.Prepare(); err != nil {
+		log.Fatalf("error preparing database: %s", err)
+	}
 	wp := worker_pool.NewPool(cfg.Streams, dr.Restore)
 	names := make(chan interface{})
 	go func() {
@@ -80,6 +89,9 @@ func main() {
 	}()
 	start := time.Now()
 	wp.Run(names)
+	if err := dr.Finish(); err != nil {
+		log.Fatalf("error doing final tasks: %s", err)
+	}
 	dr.PrintStats(cfg.Streams, time.Now().Sub(start))
 }
 
