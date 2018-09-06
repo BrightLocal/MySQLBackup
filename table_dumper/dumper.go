@@ -26,10 +26,11 @@ func (s stats) Bytes() int              { return s.bytes }
 func (s stats) Duration() time.Duration { return s.duration }
 
 type Dumper struct {
-	dsn       string
-	tableName string
-	config    Config
-	w         io.Writer
+	dsn        string
+	tableName  string
+	config     Config
+	w          io.Writer
+	withHeader bool
 }
 
 func NewTableDumper(dsn, tableName string, config Config) *Dumper {
@@ -38,6 +39,11 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 		tableName: tableName,
 		config:    config,
 	}
+}
+
+func (d *Dumper) WithHeader(withHeader bool) *Dumper {
+	d.withHeader = withHeader
+	return d
 }
 
 func (d *Dumper) Run(w io.Writer, conn *sqlx.DB, withHeader bool) (stats, error) {

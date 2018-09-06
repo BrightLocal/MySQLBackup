@@ -74,7 +74,8 @@ func main() {
 	}
 	log.Printf("Will use %d streams", cfg.Streams)
 	dd := dir_dumper.
-		NewDirDumper(cfg.Dir, cfg.WithHeader, dbInfo).
+		NewDirDumper(cfg.Dir, dbInfo).
+		WithHeader(cfg.WithHeader).
 		Connect(cfg.DSN).
 		RunAfter(cfg.RunAfter)
 	wp := worker_pool.NewPool(cfg.Streams, dd.Dump)
