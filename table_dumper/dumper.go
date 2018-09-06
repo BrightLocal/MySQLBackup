@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -79,11 +78,22 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 }
 
 func (d *Dumper) writeHeader(columnNames []string) error {
-	headerColumns := make([]string, len(columnNames))
-	for i, name := range columnNames {
-		headerColumns[i] = fmt.Sprintf("`%s`", name)
+	if len(columnNames) == 0 {
+		return nil
 	}
-	_, err := io.WriteString(d.w, strings.Join(headerColumns, ",")+"\n")
+
+	if _, err := d.w.Write([]byte(fmt.Sprintf("`%s`", columnNames[0]))); err != nil {
+		return err
+	}
+	columnNames = columnNames[1:]
+
+	for _, name := range columnNames {
+		if _, err := d.w.Write([]byte(fmt.Sprintf(",`%s`", name))); err != nil {
+			return err
+		}
+	}
+
+	_, err := d.w.Write([]byte{'\n'})
 	return err
 }
 
