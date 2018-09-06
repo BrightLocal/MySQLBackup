@@ -83,11 +83,8 @@ func (d *Dumper) writeHeader(columnNames []string) error {
 	for i, name := range columnNames {
 		headerColumns[i] = fmt.Sprintf("`%s`", name)
 	}
-	if _, err := io.WriteString(d.w, strings.Join(headerColumns, ",")+"\n"); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := io.WriteString(d.w, strings.Join(headerColumns, ",")+"\n")
+	return err
 }
 
 func (d *Dumper) compactRow(row []interface{}) (int, error) {
