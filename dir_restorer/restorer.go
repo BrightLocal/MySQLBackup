@@ -34,6 +34,8 @@ type DirRestorer struct {
 	totalDuration time.Duration
 	create        bool
 	truncate      bool
+	filter        string
+	dryRun        bool
 }
 
 func NewDirRestorer(dir string) *DirRestorer {
@@ -55,6 +57,16 @@ func (d *DirRestorer) Connect(dsn, db string) *DirRestorer {
 	if err != nil {
 		log.Fatalf("Error connecting: %s", err)
 	}
+	return d
+}
+
+func (d *DirRestorer) WithFilter(filter string) *DirRestorer {
+	// TODO parse filter
+	return d
+}
+
+func (d *DirRestorer) WithDryRun(dryRun bool) *DirRestorer {
+	d.dryRun = dryRun
 	return d
 }
 
@@ -195,7 +207,7 @@ func (d *DirRestorer) Restore(tableName interface{}) {
 			log.Fatalf("table %s does not exist, and automatic creation not allowed", name)
 		}
 	}
-	tr := table_restorer.New(d.dsn, name, FindTableColumns(d.schema, name))
+	tr := table_restorer.New(d.dsn, name, FindTableColumns(d.schema, name)).WithDryRun(d.dryRun)
 	restoreResult, err := tr.Run(decompressor, d.conn)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)

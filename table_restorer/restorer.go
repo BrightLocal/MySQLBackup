@@ -25,6 +25,7 @@ type Restorer struct {
 	columns   []string
 	colNum    int
 	query     string
+	dryRun    bool
 }
 
 func New(dsn, tableName string, columns []string) *Restorer {
@@ -42,6 +43,11 @@ func New(dsn, tableName string, columns []string) *Restorer {
 		vals[i] = "?"
 	}
 	r.query += strings.Join(cols, ",") + ") VALUES (" + strings.Join(vals, ",") + ")"
+	return r
+}
+
+func (r *Restorer) WithDryRun(dryRun bool) *Restorer {
+	r.dryRun = dryRun
 	return r
 }
 
