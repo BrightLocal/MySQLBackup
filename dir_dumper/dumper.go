@@ -35,14 +35,16 @@ type DirDumper struct {
 	totalBytes    int
 	totalDuration time.Duration
 	runAfter      string
+	withHeader    bool
 }
 
 const fileSuffix = ".csjson.bz2"
 
-func NewDirDumper(dir string, config table_dumper.Config) *DirDumper {
+func NewDirDumper(dir string, withHeader bool, config table_dumper.Config) *DirDumper {
 	return &DirDumper{
-		dir:    dir,
-		config: config,
+		dir:        dir,
+		config:     config,
+		withHeader: withHeader,
 	}
 }
 
@@ -82,7 +84,7 @@ func (d *DirDumper) Dump(tableName interface{}) {
 		log.Fatalf("Error getting writer: %s", err)
 	}
 	compressor, _ := bzip2.NewWriter(writer, &bzip2.WriterConfig{Level: bzip2.BestCompression})
-	dumpResult, err := td.Run(compressor, d.conn)
+	dumpResult, err := td.Run(compressor, d.conn, d.withHeader)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)
 		compressor.Close()

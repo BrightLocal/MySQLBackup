@@ -29,6 +29,7 @@ type dumperConfig struct {
 	Streams    int
 	DSN        string
 	RunAfter   string
+	WithHeader bool
 }
 
 func main() {
@@ -45,6 +46,7 @@ func main() {
 	flag.StringVar(&cfg.Dir, "dir", ".", "Destination directory path")
 	flag.StringVar(&cfg.RunAfter, "run-after", "", "Command to run after a file dump (%FILE_NAME% and %FILE_PATH% will be substituted)")
 	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to dump in parallel")
+	flag.BoolVar(&cfg.WithHeader, "with-header", false, "Add header with column names to the backup")
 	flag.Parse()
 	if cfg.Database == "" {
 		flag.Usage()
@@ -72,7 +74,7 @@ func main() {
 	}
 	log.Printf("Will use %d streams", cfg.Streams)
 	dd := dir_dumper.
-		NewDirDumper(cfg.Dir, dbInfo).
+		NewDirDumper(cfg.Dir, cfg.WithHeader, dbInfo).
 		Connect(cfg.DSN).
 		RunAfter(cfg.RunAfter)
 	wp := worker_pool.NewPool(cfg.Streams, dd.Dump)

@@ -40,7 +40,7 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 	}
 }
 
-func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
+func (d *Dumper) Run(w io.Writer, conn *sqlx.DB, withHeader bool) (stats, error) {
 	d.w = w
 	s := stats{}
 	log.Printf("Starting dumping table %q", d.tableName)
@@ -52,12 +52,14 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 	defer result.Close()
 	start := time.Now()
 
-	columnNames, err := result.Columns()
-	if err != nil {
-		return s, err
-	}
-	if err := d.writeHeader(columnNames); err != nil {
-		return s, err
+	if withHeader {
+		columnNames, err := result.Columns()
+		if err != nil {
+			return s, err
+		}
+		if err := d.writeHeader(columnNames); err != nil {
+			return s, err
+		}
 	}
 
 	for result.Next() {
