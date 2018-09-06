@@ -16,6 +16,7 @@ Usage:
  -username=user \                      # will be used if no login-path is given
  -password=secret \
  -run-after=~/my-script.sh %FILE_PATH% # command to run after a table is dumped, %FILE_NAME% and %FILE_PATH% placeholders available
+ -with-header                          # add header with column names to the backup
 ```
 A file will be created for each table using `table_name.csjson.bz2` naming schema.
 
