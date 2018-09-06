@@ -24,6 +24,31 @@ func (r *LineReader) Parse(row chan []interface{}) {
 		close(row)
 	}()
 	escaped := false
+
+	// skip header in ``
+	firstRune, _, err := r.r.ReadRune()
+	if err != nil {
+		if err != io.EOF {
+			log.Printf("Error reading: %s", err)
+		}
+		return
+	}
+	if firstRune == '`' {
+		if _, err := r.r.ReadString('\n'); err != nil {
+			if err != io.EOF {
+				log.Printf("Error reading: %s", err)
+			}
+			return
+		}
+	} else {
+		if err := r.r.UnreadRune(); err != nil {
+			if err != io.EOF {
+				log.Printf("Error reading: %s", err)
+			}
+			return
+		}
+	}
+
 	for {
 		ru, _, err := r.r.ReadRune()
 		if err != nil {

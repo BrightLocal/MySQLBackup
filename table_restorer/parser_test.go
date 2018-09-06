@@ -6,19 +6,19 @@ import (
 	"testing"
 )
 
-var lines = []byte(`1050,,29,"yellowbot\"","2013-04-28 22:47:31\\\\",2,"Old: \"God sends food","Richard A\\","tap.\nI","","b0405f762ccefbc2bcf27b0a8522ea6ee76f5be4","\\\\tripadvisor  2",
+var lines = []byte("`field`,`field2`\n" + `1050,,29,"yellowbot\"","2013-04-28 22:47:31\\\\",2,"Old: \"God sends food","Richard A\\","tap.\nI","","b0405f762ccefbc2bcf27b0a8522ea6ee76f5be4","\\\\tripadvisor  2",
 `)
 var expected = []interface{}{
-	float64(1050),          // 0
-	nil,                    // 1
-	float64(29),            // 2
-	"yellowbot\"",          // 3
-	`2013-04-28 22:47:31\\`,  // 4
-	float64(2),             // 5
-	`Old: "God sends food`, // 6
-	"Richard A\\",          // 7
-	"tap.\nI",              // 8
-	"",                     // 9
+	float64(1050),           // 0
+	nil,                     // 1
+	float64(29),             // 2
+	"yellowbot\"",           // 3
+	`2013-04-28 22:47:31\\`, // 4
+	float64(2),              // 5
+	`Old: "God sends food`,  // 6
+	"Richard A\\",           // 7
+	"tap.\nI",               // 8
+	"",                      // 9
 	"b0405f762ccefbc2bcf27b0a8522ea6ee76f5be4", // 10
 	`\\tripadvisor  2`,                         // 11
 	nil,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -51,6 +52,15 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 	}
 	defer result.Close()
 	start := time.Now()
+
+	columnNames, err := result.Columns()
+	if err != nil {
+		return s, err
+	}
+	if err := d.writeHeader(columnNames); err != nil {
+		return s, err
+	}
+
 	for result.Next() {
 		row, err := result.SliceScan()
 		if err != nil {
@@ -66,6 +76,18 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 	s.duration = time.Now().Sub(start)
 	log.Printf("Finished dumping table %q (%d rows, %d bytes) in %s", d.tableName, s.Rows(), s.Bytes(), s.Duration().String())
 	return s, nil
+}
+
+func (d *Dumper) writeHeader(columnNames []string) error {
+	headerColumns := make([]string, len(columnNames))
+	for i, name := range columnNames {
+		headerColumns[i] = fmt.Sprintf("`%s`", name)
+	}
+	if _, err := io.WriteString(d.w, strings.Join(headerColumns, ",")+"\n"); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Dumper) compactRow(row []interface{}) (int, error) {
