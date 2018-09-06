@@ -46,7 +46,7 @@ func (d *Dumper) WithHeader(withHeader bool) *Dumper {
 	return d
 }
 
-func (d *Dumper) Run(w io.Writer, conn *sqlx.DB, withHeader bool) (stats, error) {
+func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 	d.w = w
 	s := stats{}
 	log.Printf("Starting dumping table %q", d.tableName)
@@ -58,7 +58,7 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB, withHeader bool) (stats, error)
 	defer result.Close()
 	start := time.Now()
 
-	if withHeader {
+	if d.withHeader {
 		columnNames, err := result.Columns()
 		if err != nil {
 			return s, err

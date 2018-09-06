@@ -88,7 +88,7 @@ func (d *DirDumper) Dump(tableName interface{}) {
 		log.Fatalf("Error getting writer: %s", err)
 	}
 	compressor, _ := bzip2.NewWriter(writer, &bzip2.WriterConfig{Level: bzip2.BestCompression})
-	dumpResult, err := td.Run(compressor, d.conn, d.withHeader)
+	dumpResult, err := td.Run(compressor, d.conn)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)
 		compressor.Close()
