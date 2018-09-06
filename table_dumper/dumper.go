@@ -26,10 +26,11 @@ func (s stats) Bytes() int              { return s.bytes }
 func (s stats) Duration() time.Duration { return s.duration }
 
 type Dumper struct {
-	dsn       string
-	tableName string
-	config    Config
-	w         io.Writer
+	dsn        string
+	tableName  string
+	config     Config
+	w          io.Writer
+	withHeader bool
 }
 
 func NewTableDumper(dsn, tableName string, config Config) *Dumper {
@@ -38,6 +39,11 @@ func NewTableDumper(dsn, tableName string, config Config) *Dumper {
 		tableName: tableName,
 		config:    config,
 	}
+}
+
+func (d *Dumper) WithHeader(withHeader bool) *Dumper {
+	d.withHeader = withHeader
+	return d
 }
 
 func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
@@ -51,6 +57,17 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 	}
 	defer result.Close()
 	start := time.Now()
+
+	if d.withHeader {
+		columnNames, err := result.Columns()
+		if err != nil {
+			return s, err
+		}
+		if err := d.writeHeader(columnNames); err != nil {
+			return s, err
+		}
+	}
+
 	for result.Next() {
 		row, err := result.SliceScan()
 		if err != nil {
@@ -66,6 +83,22 @@ func (d *Dumper) Run(w io.Writer, conn *sqlx.DB) (stats, error) {
 	s.duration = time.Now().Sub(start)
 	log.Printf("Finished dumping table %q (%d rows, %d bytes) in %s", d.tableName, s.Rows(), s.Bytes(), s.Duration().String())
 	return s, nil
+}
+
+func (d *Dumper) writeHeader(columnNames []string) error {
+	if len(columnNames) == 0 {
+		return nil
+	}
+	if _, err := d.w.Write([]byte("`" + columnNames[0] + "`")); err != nil {
+		return err
+	}
+	for _, name := range columnNames[1:] {
+		if _, err := d.w.Write([]byte(",`" + name + "`")); err != nil {
+			return err
+		}
+	}
+	_, err := d.w.Write([]byte{'\n'})
+	return err
 }
 
 func (d *Dumper) compactRow(row []interface{}) (int, error) {

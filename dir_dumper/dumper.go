@@ -35,6 +35,7 @@ type DirDumper struct {
 	totalBytes    int
 	totalDuration time.Duration
 	runAfter      string
+	withHeader    bool
 }
 
 const fileSuffix = ".csjson.bz2"
@@ -44,6 +45,11 @@ func NewDirDumper(dir string, config table_dumper.Config) *DirDumper {
 		dir:    dir,
 		config: config,
 	}
+}
+
+func (d *DirDumper) WithHeader(withHeader bool) *DirDumper {
+	d.withHeader = withHeader
+	return d
 }
 
 func (d *DirDumper) RunAfter(cmd string) *DirDumper {
@@ -75,7 +81,7 @@ func (d *DirDumper) Connect(dsn string) *DirDumper {
 
 func (d *DirDumper) Dump(tableName interface{}) {
 	name := tableName.(string)
-	td := table_dumper.NewTableDumper(d.dsn, name, d.config)
+	td := table_dumper.NewTableDumper(d.dsn, name, d.config).WithHeader(d.withHeader)
 	fileName := name + fileSuffix
 	writer, err := d.getWriter(fileName)
 	if err != nil {
