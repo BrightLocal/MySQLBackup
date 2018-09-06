@@ -87,8 +87,13 @@ func (d *Dumper) writeHeader(columnNames []string) error {
 	}
 	columnNames = columnNames[1:]
 
-	for _, name := range columnNames {
-		if _, err := d.w.Write([]byte(fmt.Sprintf(",`%s`", name))); err != nil {
+	for i, name := range columnNames {
+		if i > 0 {
+			if _, err := d.w.Write([]byte{','}); err != nil {
+				return err
+			}
+		}
+		if _, err := d.w.Write([]byte("`" + name + "`")); err != nil {
 			return err
 		}
 	}
