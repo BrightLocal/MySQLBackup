@@ -100,7 +100,7 @@ func (d *DirRestorer) getReader(fileName string) (io.ReadCloser, error) {
 			return nil, errors.New("path expected")
 		}
 		if where.Host == "" {
-			return nil, errors.New("host name is empty expected")
+			return nil, errors.New("host name is empty")
 		}
 		if where.Port() == "" {
 			where.Host = where.Host + ":22"
@@ -163,7 +163,7 @@ func (d *DirRestorer) Restore(tableName interface{}) {
 		decompressor, _ = gzip.NewReader(reader)
 	}
 	if decompressor == nil {
-		log.Printf("could not detect decompressing argo for file %q", fileName)
+		log.Printf("could not detect compression format for file %q", fileName)
 		return
 	}
 	rows, err := d.conn.Query(
