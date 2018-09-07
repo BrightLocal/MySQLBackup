@@ -67,7 +67,7 @@ func main() {
 		}
 	}
 
-	dataFilter, err := filter.New(cfg.Filter)
+	dataFilter, err := filter.NewFilterSet(cfg.Filter)
 	if err != nil {
 		log.Fatalf("error to parse filter (%s): %s", cfg.Filter, err)
 	}
