@@ -1,6 +1,7 @@
 package table_restorer
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"log"
@@ -62,13 +63,11 @@ func (r *Restorer) WithFilter(filter *filter.Filter) *Restorer {
 
 func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 	log.Printf("Restoring table %s: %s", r.tableName, strings.Join(r.columns, ", "))
-	statement, err := conn.Prepare(r.query)
-	if err != nil {
-		return stats{}, err
-	}
 	l := NewReader(in)
 	rows := make(chan []interface{})
 	go l.Parse(rows)
+	var statement *sql.Stmt
+
 	for row := range rows {
 		dataAsMap, err := r.getDataAsMap(row)
 		if err != nil {
@@ -80,8 +79,21 @@ func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 		}
 
 		if r.dryRun {
-			fmt.Printf("INSERT: %+v\n", row)
+			fmt.Println(r.getRowSQL(row) + ";")
 		} else {
+			if statement == nil {
+				var err error
+				if statement, err = conn.Prepare(r.query); err != nil {
+					return stats{}, err
+				}
+				defer func() {
+					if err := statement.Close(); err != nil {
+						log.Printf("failed to close prepared statement: %s", err)
+						return
+					}
+				}()
+			}
+
 			if _, err := statement.Exec(row...); err != nil {
 				log.Printf("Warning: error executing query for table %s: %s\n%# v", r.tableName, err, row)
 			}
@@ -101,4 +113,20 @@ func (r *Restorer) getDataAsMap(data []interface{}) (map[string]interface{}, err
 	}
 
 	return result, nil
+}
+
+func (r *Restorer) getRowSQL(data []interface{}) string {
+	sql := r.query
+	for _, item := range data {
+		itemQuoted := ""
+		switch item.(type) {
+		case string:
+			itemQuoted = fmt.Sprintf("%q", item)
+		default:
+			itemQuoted = fmt.Sprintf("%v", item)
+		}
+		sql = strings.Replace(sql, "?", itemQuoted, 1)
+	}
+
+	return sql
 }
