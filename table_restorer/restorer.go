@@ -1,12 +1,15 @@
 package table_restorer
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/BrightLocal/MySQLBackup/filter"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type stats struct {
@@ -26,6 +29,7 @@ type Restorer struct {
 	colNum    int
 	query     string
 	dryRun    bool
+	filter    *filter.Filter
 }
 
 func New(dsn, tableName string, columns []string) *Restorer {
@@ -51,6 +55,11 @@ func (r *Restorer) WithDryRun(dryRun bool) *Restorer {
 	return r
 }
 
+func (r *Restorer) WithFilter(filter *filter.Filter) *Restorer {
+	r.filter = filter
+	return r
+}
+
 func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 	log.Printf("Restoring table %s: %s", r.tableName, strings.Join(r.columns, ", "))
 	statement, err := conn.Prepare(r.query)
@@ -61,15 +70,35 @@ func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 	rows := make(chan []interface{})
 	go l.Parse(rows)
 	for row := range rows {
-		if len(row) != r.colNum {
-			//log.Printf("Warning: column number in table %q mismatch, expected %d, got %d (%s)", r.tableName, r.colNum, len(row), row[0])
-			log.Fatalf("Warning: column number in table %q mismatch, expected %d, got %d (%s)", r.tableName, r.colNum, len(row), row[0])
+		dataAsMap, err := r.getDataAsMap(row)
+		if err != nil {
+			log.Printf("Warning: %s", err)
 			continue
 		}
-		if _, err := statement.Exec(row...); err != nil {
-			log.Printf("Warning: error executing query for table %s: %s\n%# v", r.tableName, err, row)
-			//log.Fatalf("Warning: error executing query for table %s: %s\n%# v", r.tableName, err, row)
+		if r.filter != nil && !r.filter.Passes(dataAsMap) {
+			continue // skip row by filter expression
+		}
+
+		if r.dryRun {
+			fmt.Printf("INSERT: %+v\n", row)
+		} else {
+			if _, err := statement.Exec(row...); err != nil {
+				log.Printf("Warning: error executing query for table %s: %s\n%# v", r.tableName, err, row)
+			}
 		}
 	}
 	return stats{}, nil
+}
+
+func (r *Restorer) getDataAsMap(data []interface{}) (map[string]interface{}, error) {
+	if len(data) != r.colNum {
+		return nil, errors.Errorf("column number in table %q mismatch, expected %d, got %d", r.tableName, r.colNum, len(data))
+	}
+
+	result := map[string]interface{}{}
+	for i, item := range data {
+		result[r.columns[i]] = item
+	}
+
+	return result, nil
 }

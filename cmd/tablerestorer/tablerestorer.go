@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/BrightLocal/MySQLBackup/dir_restorer"
+	"github.com/BrightLocal/MySQLBackup/filter"
 	"github.com/BrightLocal/MySQLBackup/mylogin_reader"
 	"github.com/BrightLocal/MySQLBackup/worker_pool"
 )
@@ -65,9 +66,15 @@ func main() {
 			skipList[strings.TrimSpace(t)] = struct{}{}
 		}
 	}
+
+	dataFilter, err := filter.New(cfg.Filter)
+	if err != nil {
+		log.Fatalf("error to parse filter (%s): %s", cfg.Filter, err)
+	}
+
 	dr := dir_restorer.
 		NewDirRestorer(cfg.Dir).
-		WithFilter(cfg.Filter).
+		WithFilter(dataFilter).
 		WithDryRun(cfg.DryRun).
 		Connect(cfg.DSN, cfg.Database).
 		CreateTables(cfg.Create).
