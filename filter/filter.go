@@ -10,39 +10,22 @@ type FilterSet map[string]*Filter
 
 type Filter struct {
 	tableName string
-	expr      Expr
+	expr      Operator
 }
 
-type Op string
-type OperandType string
+var errFieldNotFound = errors.New("field not found")
 
-const (
-	OpAnd    Op = "AND"
-	OpOr        = "OR"
-	OpNot       = "NOT"
-	OpEq        = "="
-	OpNe        = "!="
-	OpGt        = ">"
-	OpGe        = ">="
-	OpLt        = "<"
-	OpLe        = "<="
-	OpIsNull    = "IS NULL"
-	OpIn        = "IN"
-)
-
-const (
-	OperandField      OperandType = "field"
-	OperandValue                  = "value"
-	OperandExpression             = "expression"
-)
-
-type Expr struct {
-	Type     OperandType
-	Op       Op
-	Name     string      // if Type == "field"
-	Value    interface{} // if Type == "value"
-	Operands []Expr      // if Type == "expression"
-}
+// OpAnd Op = "AND"
+// OpOr  = "OR"
+// OpNot = "NOT"
+// OpEq        = "="
+// OpNe     = "!="
+// OpGt     = ">"
+// OpGe     = ">="
+// OpLt     = "<"
+// OpLe     = "<="
+// OpIsNull = "IS NULL"
+// OpIn     = "IN"
 
 // NewFilterSet returns new filters for expression:
 // table_name(field == "val"),table02(field02 != "val2" AND field03 == 123)
@@ -69,107 +52,5 @@ func NewFilter(expression string) (*Filter, error) {
 }
 
 func (f *Filter) Passes(data map[string]interface{}) (bool, error) {
-	return f.expr.eval(data)
-}
-
-var (
-	errExpectedExpression   = errors.New("expected expression")
-	errOperandNotFound      = errors.New("operand not found")
-	errFieldNotFound        = errors.New("field not found")
-	errInvalidOperandType   = errors.New("invalid operand type")
-	errInvalidOperationType = errors.New("invalid operation type")
-)
-
-func (expr Expr) eval(data map[string]interface{}) (bool, error) {
-	if expr.Type != OperandExpression {
-		return false, errors.Wrapf(errExpectedExpression, "but found: %v", expr.Type)
-	}
-
-	switch expr.Op {
-	case OpEq, OpNe, OpGt, OpGe, OpLt, OpLe:
-		var (
-			x, y interface{}
-			ok   bool
-		)
-
-		switch expr.Operands[0].Type {
-		case OperandField:
-			x, ok = data[expr.Operands[0].Name]
-			if !ok {
-				return false, errors.Wrap(errFieldNotFound, "for first argument")
-			}
-		case OperandValue:
-			x = expr.Operands[0].Value
-		default:
-			return false, errors.Wrapf(errInvalidOperandType, "for first operand")
-		}
-		switch expr.Operands[1].Type {
-		case OperandField:
-			y, ok = data[expr.Operands[1].Name]
-			if !ok {
-				return false, errors.Wrap(errFieldNotFound, "for second argument")
-			}
-		case OperandValue:
-			y = expr.Operands[1].Value
-		default:
-			return false, errors.Wrapf(errInvalidOperandType, "for second operand")
-		}
-
-		switch expr.Op {
-		case OpEq:
-			return x == y, nil
-		case OpNe:
-			return x != y, nil
-		case OpGt:
-			// TODO cast x/y to string or int for "x > y"
-			return false, nil
-		case OpGe:
-			// TODO cast x/y to string or int for "x >= y"
-			return false, nil
-		case OpLt:
-			// TODO cast x/y to string or int for "x < y"
-			return false, nil
-		case OpLe:
-			// TODO cast x/y to string or int for "x <= y"
-			return false, nil
-		default:
-			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
-		}
-
-	case OpIsNull:
-		operand, ok := data[expr.Operands[0].Name]
-		if !ok {
-			return false, errors.Wrap(errFieldNotFound, "for IS NULL argument")
-		}
-		return operand == nil, nil
-
-	case OpAnd, OpOr:
-		xRes, err := expr.Operands[0].eval(data)
-		if err != nil {
-			return false, err
-		}
-		yRes, err := expr.Operands[1].eval(data)
-		if err != nil {
-			return false, err
-		}
-
-		switch expr.Op {
-		case OpAnd:
-			return xRes && yRes, nil
-		case OpOr:
-			return xRes || yRes, nil
-		default:
-			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
-		}
-
-	case OpNot:
-		xRes, err := expr.Operands[0].eval(data)
-		if err != nil {
-			return false, err
-		}
-		return !xRes, nil
-
-	default:
-		return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
-	}
+	return f.expr.Value(data)
 }
