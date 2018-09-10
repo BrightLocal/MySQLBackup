@@ -22,15 +22,6 @@ func TestExpr_eval(t *testing.T) {
 			wantErr: errExpectedExpression,
 		},
 		{
-			name: "without operand",
-			expr: Expr{
-				Type: OperandExpression,
-			},
-			args:    map[string]interface{}{},
-			want:    false,
-			wantErr: errOperandNotFound,
-		},
-		{
 			name: "simple with equal, but without field in data",
 			expr: Expr{
 				Type: OperandExpression,

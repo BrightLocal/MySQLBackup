@@ -84,9 +84,6 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 	if expr.Type != OperandExpression {
 		return false, errors.Wrapf(errExpectedExpression, "but found: %v", expr.Type)
 	}
-	if len(expr.Operands) != 2 { // TODO refactor hardcode
-		return false, errOperandNotFound
-	}
 
 	switch expr.Op {
 	case OpEq, OpNe, OpGt, OpGe, OpLt, OpLe:
@@ -138,6 +135,13 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		default:
 			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
 		}
+
+	case OpIsNull:
+		operand, ok := data[expr.Operands[0].Name]
+		if !ok {
+			return false, errors.Wrap(errFieldNotFound, "for IS NULL argument")
+		}
+		return operand == nil, nil
 
 	case OpAnd, OpOr:
 		xRes, err := expr.Operands[0].eval(data)
