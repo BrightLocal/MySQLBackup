@@ -50,7 +50,7 @@ func parse(expr string) {
 	log.Printf("%s", expr)
 	parts := tokenize(expr)
 	for _, value := range parts {
-		if isOperator(value) {
+		if isSplitter(value) {
 			log.Printf("Operator: %q", value)
 		} else if isValue(value) {
 			log.Printf("Value: %q", value)
@@ -60,7 +60,7 @@ func parse(expr string) {
 	}
 }
 
-var operators = map[string]string{
+var splitters = map[string]string{
 	"(":       "",
 	")":       "",
 	",":       "",
@@ -80,8 +80,8 @@ var operators = map[string]string{
 
 const tokenLen = 7
 
-func isOperator(value string) bool {
-	_, ok := operators[value]
+func isSplitter(value string) bool {
+	_, ok := splitters[value]
 	return ok
 }
 
@@ -93,12 +93,12 @@ func tokenize(expr string) []string {
 	l := len(expr)
 	pos := 0
 	token := ""
-	tokens := []string{}
+	var tokens []string
 a:
 	for pos < l {
 		for i := tokenLen; i > 0; i-- {
 			s := substr(&expr, pos, i)
-			if isOperator(s) {
+			if isSplitter(s) {
 				if token != "" {
 					tokens = append(tokens, token)
 				}
@@ -125,7 +125,7 @@ func substr(expr *string, start, l int) string {
 }
 
 func balance(in []string) []string {
-	out := []string{}
+	var out []string
 	token := ""
 	for i := 0; i < len(in); i++ {
 		if in[i] == "'" {
