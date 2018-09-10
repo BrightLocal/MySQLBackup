@@ -94,12 +94,17 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 	switch expr.Op {
 	case OpEq, OpNe:
 
-		var x, y interface{}
+		var (
+			x, y interface{}
+			ok   bool
+		)
 
 		switch expr.X.Type {
 		case OperandField:
-			// TODO: check exists field in map
-			x = data[expr.X.Name]
+			x, ok = data[expr.X.Name]
+			if !ok {
+				return false, errors.Wrap(errFieldNotFound, "for fisrt argument")
+			}
 		case OperandValue:
 			x = expr.X.Value
 		default:
@@ -107,8 +112,10 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		}
 		switch expr.Y.Type {
 		case OperandField:
-			// TODO: check exists field in map
-			y = data[expr.Y.Name]
+			y, ok = data[expr.Y.Name]
+			if !ok {
+				return false, errors.Wrap(errFieldNotFound, "for second argument")
+			}
 		case OperandValue:
 			y = expr.Y.Value
 		default:
@@ -118,24 +125,10 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		if expr.Op == OpEq {
 			return x == y, nil
 		}
-
 		return x != y, nil
 
 	case OpAnd, OpOr:
 		if expr.X.Type == OperandExpression && expr.Y.Type == OperandExpression {
-			if expr.Op == OpAnd {
-				xRes, err := expr.X.eval(data)
-				if err != nil {
-					return false, err
-				}
-				yRes, err := expr.Y.eval(data)
-				if err != nil {
-					return false, err
-				}
-
-				return xRes && yRes, nil
-			}
-
 			xRes, err := expr.X.eval(data)
 			if err != nil {
 				return false, err
@@ -145,6 +138,9 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 				return false, err
 			}
 
+			if expr.Op == OpAnd {
+				return xRes && yRes, nil
+			}
 			return xRes || yRes, nil
 
 		} else {
