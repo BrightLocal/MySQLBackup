@@ -74,8 +74,12 @@ func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 			log.Printf("Warning: %s", err)
 			continue
 		}
-		if r.filter != nil && !r.filter.Passes(dataAsMap) {
-			continue // skip row by filter expression
+		if r.filter != nil {
+			if passes, err := r.filter.Passes(dataAsMap); err != nil {
+				return stats{}, err
+			} else if !passes {
+				continue // skip row by filter expression
+			}
 		}
 
 		if r.dryRun {

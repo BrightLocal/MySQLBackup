@@ -2,6 +2,8 @@ package filter
 
 import (
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 type FilterSet map[string]*Filter
@@ -70,69 +72,85 @@ func (f *Filter) getTableName() (string, error) {
 	return "table01", nil
 }
 
-func (f *Filter) Passes(data map[string]interface{}) bool {
-	if f.expr.Type != OperandExpression || f.expr.X == nil || f.expr.Y == nil {
-		// TODO: return error?
-		return false
-	}
-
+func (f *Filter) Passes(data map[string]interface{}) (bool, error) {
 	return f.expr.eval(data)
 }
 
-func (expr Expr) eval(data map[string]interface{}) bool {
-	if expr.Type == OperandExpression {
-		if expr.X == nil || expr.Y == nil {
-			// TODO: error in expression
-			return false
-		}
+var (
+	errExpectedExpression = errors.New("expected expression")
+	errOperatorNotFound   = errors.New("operator not found")
+	errFieldNotFound      = errors.New("field not found")
+	errInvalidOperandType = errors.New("invalid operand type")
+)
 
-		switch expr.Op {
-		case OpEq, OpNe:
-
-			var x, y interface{}
-
-			switch expr.X.Type {
-			case OperandField:
-				// TODO: check exists field in map
-				x = data[expr.X.Name]
-			case OperandValue:
-				x = expr.X.Value
-			default:
-				// TODO error
-				return false
-			}
-			switch expr.Y.Type {
-			case OperandField:
-				// TODO: check exists field in map
-				y = data[expr.Y.Name]
-			case OperandValue:
-				y = expr.Y.Value
-			default:
-				// TODO error
-				return false
-			}
-
-			if expr.Op == OpEq {
-				return x == y
-			}
-
-			return x != y
-
-		case OpAnd, OpOr:
-			if expr.X.Type == OperandExpression && expr.Y.Type == OperandExpression {
-				if expr.Op == OpAnd {
-					return expr.X.eval(data) && expr.Y.eval(data)
-				}
-				return expr.X.eval(data) || expr.Y.eval(data)
-
-			} else {
-				// TODO error
-				return false
-			}
-		}
-	} else {
-		return false
+func (expr Expr) eval(data map[string]interface{}) (bool, error) {
+	if expr.Type != OperandExpression {
+		return false, errors.Wrapf(errExpectedExpression, "but found: %v", expr.Type)
+	}
+	if expr.X == nil || expr.Y == nil {
+		return false, errOperatorNotFound
 	}
 
-	return false
+	switch expr.Op {
+	case OpEq, OpNe:
+
+		var x, y interface{}
+
+		switch expr.X.Type {
+		case OperandField:
+			// TODO: check exists field in map
+			x = data[expr.X.Name]
+		case OperandValue:
+			x = expr.X.Value
+		default:
+			return false, errors.Wrapf(errInvalidOperandType, "for first operand")
+		}
+		switch expr.Y.Type {
+		case OperandField:
+			// TODO: check exists field in map
+			y = data[expr.Y.Name]
+		case OperandValue:
+			y = expr.Y.Value
+		default:
+			return false, errors.Wrapf(errInvalidOperandType, "for second operand")
+		}
+
+		if expr.Op == OpEq {
+			return x == y, nil
+		}
+
+		return x != y, nil
+
+	case OpAnd, OpOr:
+		if expr.X.Type == OperandExpression && expr.Y.Type == OperandExpression {
+			if expr.Op == OpAnd {
+				xRes, err := expr.X.eval(data)
+				if err != nil {
+					return false, err
+				}
+				yRes, err := expr.Y.eval(data)
+				if err != nil {
+					return false, err
+				}
+
+				return xRes && yRes, nil
+			}
+
+			xRes, err := expr.X.eval(data)
+			if err != nil {
+				return false, err
+			}
+			yRes, err := expr.Y.eval(data)
+			if err != nil {
+				return false, err
+			}
+
+			return xRes || yRes, nil
+
+		} else {
+			return false, errors.Wrapf(errExpectedExpression, "for AND/OR operation, but found: X: %v, Y: %v", expr.X.Type, expr.Y.Type)
+		}
+	default:
+		return false, errInvalidOperandType
+	}
 }
