@@ -35,13 +35,15 @@ func TestExpr_eval(t *testing.T) {
 			expr: Expr{
 				Type: OperandExpression,
 				Op:   OpEq,
-				X: &Expr{
-					Type: OperandField,
-					Name: "field01",
-				},
-				Y: &Expr{
-					Type:  OperandValue,
-					Value: "val01",
+				Operands: []Expr{
+					{
+						Type: OperandField,
+						Name: "field01",
+					},
+					{
+						Type:  OperandValue,
+						Value: "val01",
+					},
 				},
 			},
 			args:    map[string]interface{}{},
@@ -53,13 +55,15 @@ func TestExpr_eval(t *testing.T) {
 			expr: Expr{
 				Type: OperandExpression,
 				Op:   OpEq,
-				X: &Expr{
-					Type: OperandField,
-					Name: "field01",
-				},
-				Y: &Expr{
-					Type:  OperandValue,
-					Value: "val01",
+				Operands: []Expr{
+					{
+						Type: OperandField,
+						Name: "field01",
+					},
+					{
+						Type:  OperandValue,
+						Value: "val01",
+					},
 				},
 			},
 			args:    map[string]interface{}{"field01": "val01"},
@@ -71,13 +75,15 @@ func TestExpr_eval(t *testing.T) {
 			expr: Expr{
 				Type: OperandExpression,
 				Op:   OpEq,
-				X: &Expr{
-					Type: OperandField,
-					Name: "field01",
-				},
-				Y: &Expr{
-					Type:  OperandValue,
-					Value: "val01",
+				Operands: []Expr{
+					{
+						Type: OperandField,
+						Name: "field01",
+					},
+					{
+						Type:  OperandValue,
+						Value: "val01",
+					},
 				},
 			},
 			args:    map[string]interface{}{"field01": "val02"},

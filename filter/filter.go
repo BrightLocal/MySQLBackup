@@ -37,11 +37,11 @@ const (
 )
 
 type Expr struct {
-	Type  OperandType
-	Op    Op
-	Name  string      // if Type == "field"
-	Value interface{} // if Type == "value"
-	X, Y  *Expr       // if Type == "expression"
+	Type     OperandType
+	Op       Op
+	Name     string      // if Type == "field"
+	Value    interface{} // if Type == "value"
+	Operands []Expr      // if Type == "expression"
 }
 
 // NewFilterSet returns new filters for expression:
@@ -84,7 +84,7 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 	if expr.Type != OperandExpression {
 		return false, errors.Wrapf(errExpectedExpression, "but found: %v", expr.Type)
 	}
-	if expr.X == nil || expr.Y == nil {
+	if len(expr.Operands) != 2 { // TODO refactor hardcode
 		return false, errOperandNotFound
 	}
 
@@ -95,25 +95,25 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 			ok   bool
 		)
 
-		switch expr.X.Type {
+		switch expr.Operands[0].Type {
 		case OperandField:
-			x, ok = data[expr.X.Name]
+			x, ok = data[expr.Operands[0].Name]
 			if !ok {
 				return false, errors.Wrap(errFieldNotFound, "for first argument")
 			}
 		case OperandValue:
-			x = expr.X.Value
+			x = expr.Operands[0].Value
 		default:
 			return false, errors.Wrapf(errInvalidOperandType, "for first operand")
 		}
-		switch expr.Y.Type {
+		switch expr.Operands[1].Type {
 		case OperandField:
-			y, ok = data[expr.Y.Name]
+			y, ok = data[expr.Operands[1].Name]
 			if !ok {
 				return false, errors.Wrap(errFieldNotFound, "for second argument")
 			}
 		case OperandValue:
-			y = expr.Y.Value
+			y = expr.Operands[1].Value
 		default:
 			return false, errors.Wrapf(errInvalidOperandType, "for second operand")
 		}
@@ -128,11 +128,11 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		}
 
 	case OpAnd, OpOr:
-		xRes, err := expr.X.eval(data)
+		xRes, err := expr.Operands[0].eval(data)
 		if err != nil {
 			return false, err
 		}
-		yRes, err := expr.Y.eval(data)
+		yRes, err := expr.Operands[1].eval(data)
 		if err != nil {
 			return false, err
 		}
