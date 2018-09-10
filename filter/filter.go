@@ -77,10 +77,11 @@ func (f *Filter) Passes(data map[string]interface{}) (bool, error) {
 }
 
 var (
-	errExpectedExpression = errors.New("expected expression")
-	errOperandNotFound    = errors.New("operand not found")
-	errFieldNotFound      = errors.New("field not found")
-	errInvalidOperandType = errors.New("invalid operand type")
+	errExpectedExpression   = errors.New("expected expression")
+	errOperandNotFound      = errors.New("operand not found")
+	errFieldNotFound        = errors.New("field not found")
+	errInvalidOperandType   = errors.New("invalid operand type")
+	errInvalidOperationType = errors.New("invalid operation type")
 )
 
 func (expr Expr) eval(data map[string]interface{}) (bool, error) {
@@ -93,7 +94,6 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 
 	switch expr.Op {
 	case OpEq, OpNe:
-
 		var (
 			x, y interface{}
 			ok   bool
@@ -122,10 +122,14 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 			return false, errors.Wrapf(errInvalidOperandType, "for second operand")
 		}
 
-		if expr.Op == OpEq {
+		switch expr.Op {
+		case OpEq:
 			return x == y, nil
+		case OpNe:
+			return x != y, nil
+		default:
+			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
 		}
-		return x != y, nil
 
 	case OpAnd, OpOr:
 		xRes, err := expr.X.eval(data)
@@ -137,10 +141,15 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 			return false, err
 		}
 
-		if expr.Op == OpAnd {
+		switch expr.Op {
+		case OpAnd:
 			return xRes && yRes, nil
+		case OpOr:
+			return xRes || yRes, nil
+		default:
+			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
 		}
-		return xRes || yRes, nil
+
 	default:
 		return false, errInvalidOperandType
 	}
