@@ -21,18 +21,6 @@ var (
 	errTypeNotSupported = errors.New("type not supported")
 )
 
-// OpAnd Op = "AND"
-// OpOr  = "OR"
-// OpNot = "NOT"
-// OpEq        = "="
-// OpNe     = "!="
-// OpGt     = ">"
-// OpGe     = ">="
-// OpLt     = "<"
-// OpLe     = "<="
-// OpIsNull = "IS NULL"
-// OpIn     = "IN"
-
 // NewFilterSet returns new filters for expression:
 // table_name(field == "val"),table02(field02 != "val2" AND field03 == 123)
 func NewFilterSet(expression string, tableFields map[string][]string) (result FilterSet, err error) {
