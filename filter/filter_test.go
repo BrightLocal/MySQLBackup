@@ -66,6 +66,24 @@ func TestExpr_eval(t *testing.T) {
 			want:    true,
 			wantErr: nil,
 		},
+		{
+			name: "simple with equal op, but not equal",
+			expr: Expr{
+				Type: OperandExpression,
+				Op:   OpEq,
+				X: &Expr{
+					Type: OperandField,
+					Name: "field01",
+				},
+				Y: &Expr{
+					Type:  OperandValue,
+					Value: "val01",
+				},
+			},
+			args:    map[string]interface{}{"field01": "val02"},
+			want:    false,
+			wantErr: nil,
+		},
 	}
 
 	for _, tt := range tests {
