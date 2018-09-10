@@ -17,10 +17,17 @@ type Op string
 type OperandType string
 
 const (
-	OpAnd Op = "AND"
-	OpOr     = "OR"
-	OpEq     = "=="
-	OpNe     = "!="
+	OpAnd    Op = "AND"
+	OpOr        = "OR"
+	OpEq        = "="
+	OpNe        = "!="
+	OpGt        = ">"
+	OpGe        = ">="
+	OpLt        = "<"
+	OpLe        = "<="
+	OpNot       = "NOT"
+	OpIsNull    = "IS NULL"
+	OpIn        = "IN"
 )
 
 const (
@@ -57,19 +64,8 @@ func NewFilterSet(expression string) (FilterSet, error) {
 // NewFilter returns new filter for expression:
 // table_name(field == "val")
 func NewFilter(expression string) (*Filter, error) {
-	result := &Filter{}
-
-	tableName, err := result.getTableName()
-	if err != nil {
-		return nil, err
-	}
-	result.tableName = tableName
-
-	return result, nil
-}
-
-func (f *Filter) getTableName() (string, error) {
-	return "table01", nil
+	f := &Filter{}
+	return f, nil
 }
 
 func (f *Filter) Passes(data map[string]interface{}) (bool, error) {
@@ -103,7 +99,7 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		case OperandField:
 			x, ok = data[expr.X.Name]
 			if !ok {
-				return false, errors.Wrap(errFieldNotFound, "for fisrt argument")
+				return false, errors.Wrap(errFieldNotFound, "for first argument")
 			}
 		case OperandValue:
 			x = expr.X.Value
