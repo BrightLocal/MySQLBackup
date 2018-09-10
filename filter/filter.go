@@ -6,6 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Operator interface {
+	Value(data map[string]interface{}) (bool, error)
+}
+
 type FilterSet map[string]*Filter
 
 type Filter struct {
