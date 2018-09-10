@@ -151,6 +151,6 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		}
 
 	default:
-		return false, errInvalidOperandType
+		return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
 	}
 }
