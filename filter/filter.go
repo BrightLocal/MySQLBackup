@@ -19,13 +19,13 @@ type OperandType string
 const (
 	OpAnd    Op = "AND"
 	OpOr        = "OR"
+	OpNot       = "NOT"
 	OpEq        = "="
 	OpNe        = "!="
 	OpGt        = ">"
 	OpGe        = ">="
 	OpLt        = "<"
 	OpLe        = "<="
-	OpNot       = "NOT"
 	OpIsNull    = "IS NULL"
 	OpIn        = "IN"
 )
@@ -89,7 +89,7 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 	}
 
 	switch expr.Op {
-	case OpEq, OpNe:
+	case OpEq, OpNe, OpGt, OpGe, OpLt, OpLe:
 		var (
 			x, y interface{}
 			ok   bool
@@ -123,6 +123,18 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 			return x == y, nil
 		case OpNe:
 			return x != y, nil
+		case OpGt:
+			// TODO cast x/y to string or int for "x > y"
+			return false, nil
+		case OpGe:
+			// TODO cast x/y to string or int for "x >= y"
+			return false, nil
+		case OpLt:
+			// TODO cast x/y to string or int for "x < y"
+			return false, nil
+		case OpLe:
+			// TODO cast x/y to string or int for "x <= y"
+			return false, nil
 		default:
 			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
 		}
@@ -145,6 +157,13 @@ func (expr Expr) eval(data map[string]interface{}) (bool, error) {
 		default:
 			return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
 		}
+
+	case OpNot:
+		xRes, err := expr.Operands[0].eval(data)
+		if err != nil {
+			return false, err
+		}
+		return !xRes, nil
 
 	default:
 		return false, errors.Wrapf(errInvalidOperationType, "but found: %q", expr.Op)
