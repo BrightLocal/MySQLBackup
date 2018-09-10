@@ -4,6 +4,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 type FilterSet map[string]*Filter
@@ -39,17 +41,13 @@ func NewFilter(expression string) (*Filter, error) {
 	if err != nil {
 		return nil, err
 	}
-	result.tableName = "flags" // TODO: get name from ast tree
 	result.ast = astExpr
 
-	// switch x := astExpr.(type) {
-	// case *ast.CallExpr:
-	// 	s = x.Fun
-	// case *ast.Ident:
-	// 	s = x.Name
-	// default:
-	//    return error
-	// }
+	tableName, err := result.getTableName()
+	if err != nil {
+		return nil, err
+	}
+	result.tableName = tableName
 
 	return result, nil
 }
@@ -57,6 +55,20 @@ func NewFilter(expression string) (*Filter, error) {
 func (f *Filter) Passes(data map[string]interface{}) bool {
 	// TODO: apply expression from ast tree
 	return true
+}
+
+func (f *Filter) getTableName() (string, error) {
+	if f.ast == nil {
+		return "", errors.Errorf("ast tree is nil")
+	}
+
+	if callExpr, ok := f.ast.(*ast.CallExpr); ok {
+		if ident, ok := callExpr.Fun.(*ast.Ident); ok {
+			return ident.Name, nil
+		}
+	}
+
+	return "", errors.Errorf("failed to parse expression: not found table_name(...)")
 }
 
 /*
