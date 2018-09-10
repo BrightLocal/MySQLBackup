@@ -1,8 +1,6 @@
 package filter
 
 import (
-	"regexp"
-
 	"github.com/pkg/errors"
 )
 
@@ -10,7 +8,7 @@ type Operator interface {
 	Value(data map[string]interface{}) (bool, error)
 }
 
-type FilterSet map[string]*Filter
+type FilterSet map[string]Operator
 
 type Filter struct {
 	tableName string
@@ -37,28 +35,21 @@ var (
 
 // NewFilterSet returns new filters for expression:
 // table_name(field == "val"),table02(field02 != "val2" AND field03 == 123)
-func NewFilterSet(expression string) (FilterSet, error) {
-	result := map[string]*Filter{}
-
-	expressionTables := regexp.MustCompile(`\s*,\s*`).Split(expression, -1)
-	for _, item := range expressionTables {
-		filter, err := NewFilter(item)
+func NewFilterSet(expression string, tableFields map[string][]string) (result FilterSet, err error) {
+	for table, expr := range split(expression) {
+		if _, ok := tableFields[table]; !ok {
+			return nil, errors.New("unknown table " + table)
+		}
+		result[table], err = NewFilter(expr, tableFields[table])
 		if err != nil {
 			return nil, err
 		}
-		result[filter.tableName] = filter
 	}
-
-	return result, nil
+	return
 }
 
-// NewFilter returns new filter for expression:
-// table_name(field == "val")
-func NewFilter(expression string) (*Filter, error) {
-	f := &Filter{}
-	return f, nil
-}
-
-func (f *Filter) Passes(data map[string]interface{}) (bool, error) {
-	return f.expr.Value(data)
+// NewFilter returns new filter for table expression:
+// "table_name", "field == val OR field2 > 5"
+func NewFilter(expression string, fields []string) (Operator, error) {
+	return parse(expression, fields)
 }

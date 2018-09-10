@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+type OperatorStub struct{}
+
+func (OperatorStub) Value(values map[string]interface{}) (bool, error) {
+	return false, nil
+}
+
 var (
 	rValidKey = regexp.MustCompile("^[a-zA0-9_]+$")
 	rNumbers  = regexp.MustCompile("^[0-9.]+$")
@@ -46,9 +52,9 @@ func split(in string) map[string]string {
 	return result
 }
 
-func parse(expr string) {
+func parse(expr string, fields []string) (Operator, error) {
 	log.Printf("%s", expr)
-	parts := tokenize(expr)
+	parts := tokenize(expr, fields)
 	for _, value := range parts {
 		if isSplitter(value) {
 			log.Printf("Operator: %q", value)
@@ -58,6 +64,7 @@ func parse(expr string) {
 			log.Printf("Field: %q", value)
 		}
 	}
+	return OperatorStub{}, nil
 }
 
 var splitters = map[string]string{
@@ -78,7 +85,7 @@ var splitters = map[string]string{
 	"IS NULL": "",
 }
 
-const tokenLen = 7
+const maxTokenLen = 7
 
 func isSplitter(value string) bool {
 	_, ok := splitters[value]
@@ -89,7 +96,15 @@ func isValue(value string) bool {
 	return rNumbers.MatchString(value) || rString.MatchString(value)
 }
 
-func tokenize(expr string) []string {
+func tokenize(expr string, fields []string) []string {
+	tokenLen := maxTokenLen
+	f := make(map[string]string, len(fields))
+	for _, field := range fields {
+		f[field] = "field"
+		if l := len(field); l > maxTokenLen {
+			tokenLen = l
+		}
+	}
 	l := len(expr)
 	pos := 0
 	token := ""
