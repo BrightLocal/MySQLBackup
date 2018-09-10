@@ -6,6 +6,9 @@ import (
 )
 
 func TestParser(t *testing.T) {
+	fields := map[string][]string{
+		"table_1": {"hello", "world", "foo",},
+	}
 	in1 := `table_1(hello == 1 AND (world != 'foo( bar)' OR foo IN(bar, foo))),  table2 (f IS NULL) table3()`
 	out := split(in1)
 	for key, expression := range out {
@@ -13,7 +16,7 @@ func TestParser(t *testing.T) {
 		expression = strings.TrimSpace(expression)
 		if rValidKey.MatchString(key) {
 			t.Logf("%s > %s", key, expression)
-			parse(expression)
+			parse(expression, fields[key])
 		} else {
 			t.Errorf("Invalid key %q", key)
 		}
