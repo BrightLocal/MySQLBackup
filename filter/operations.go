@@ -45,7 +45,7 @@ func (o OpAnd) Value(data map[string]interface{}) (bool, error) {
 		return false, err
 	}
 
-	yRes, err := o.x.Value(data)
+	yRes, err := o.y.Value(data)
 	if err != nil {
 		return false, err
 	}
@@ -64,7 +64,7 @@ func (o OpOr) Value(data map[string]interface{}) (bool, error) {
 		return false, err
 	}
 
-	yRes, err := o.x.Value(data)
+	yRes, err := o.y.Value(data)
 	if err != nil {
 		return false, err
 	}
