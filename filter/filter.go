@@ -11,7 +11,11 @@ type Filter struct {
 	expr      Operator
 }
 
-var errFieldNotFound = errors.New("field not found")
+var (
+	errFieldNotFound    = errors.New("field not found")
+	errTypesMismatch    = errors.New("types mismatch")
+	errTypeNotSupported = errors.New("type not supported")
+)
 
 // OpAnd Op = "AND"
 // OpOr  = "OR"
