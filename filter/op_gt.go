@@ -29,7 +29,7 @@ func (o OpGt) Value(data map[string]interface{}) (bool, error) {
 			}
 			return false, errors.Wrapf(errTypesMismatch, "%[1]v (%[1]T) != %[2]v (%[2]T)", value, o.argument)
 		default:
-			return false, errors.Wrapf(errTypeNotSupported, "%v (%T))", value)
+			return false, errors.Wrapf(errTypeNotSupported, "%v", value)
 		}
 	}
 }
