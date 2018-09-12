@@ -17,7 +17,7 @@ func (OperatorStub) Value(values map[string]interface{}) (bool, error) {
 
 var (
 	rValidKey = regexp.MustCompile("^[a-zA0-9_]+$")
-	rNumbers  = regexp.MustCompile("^[0-9.]+$")
+	rNumbers  = regexp.MustCompile("^-?[0-9.]+$")
 	rString   = regexp.MustCompile("^('.*')|(\".*\")$")
 )
 

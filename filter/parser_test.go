@@ -10,7 +10,7 @@ func TestParser(t *testing.T) {
 		"table_1": {"hello", "world", "foo", "bar"},
 	}
 	//in1 := `table_1(hello == 1 AND (world != 'foo( bar)' OR foo IN(bar, foo)))`
-	in1 := `table_1(foo IN ('bar', 'f\'oo',123) OR foo IS NULL  AND foo > 5) AND bar == foo)`
+	in1 := `table_1(foo IN ('bar', 'f\'oo',-1.23) OR foo IS NULL  AND foo > 50) AND bar == foo)`
 	out := split(in1)
 	for key, expression := range out {
 		key = strings.TrimSpace(key)
