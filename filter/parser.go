@@ -6,19 +6,124 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 )
 
-type OperatorStub struct{}
+type NodeType string
 
-func (OperatorStub) Value(values map[string]interface{}) (bool, error) {
-	return false, nil
+type Node interface {
+	Type() NodeType
+}
+
+type BoolExpr interface {
+	Node
+	Value(data map[string]interface{}) (bool, error)
+}
+
+type Rule struct {
+	CreateNode func(params []Node) Node
+	Pattern    []NodeType
+}
+
+type SrcNode string
+
+func (sn SrcNode) isSimpleOp() bool {
+	switch sn {
+	case "==", "!=", ">", ">=", "<", "<=":
+		return true
+	default:
+		return false
+	}
+}
+
+func (sn SrcNode) Type() NodeType {
+	switch {
+	case sn == "AND":
+		return "AND"
+	case sn == "OR":
+		return "OR"
+	case sn.isSimpleOp():
+		return "SimpleOp"
+	case reField.MatchString(string(sn)):
+		return "Field"
+	case isValue(string(sn)):
+		return "Literal"
+	case sn == "(" || sn == ")":
+		return NodeType(sn)
+	default:
+		return "Unknown"
+	}
+}
+
+var rules = []Rule{
+	{
+		Pattern: parsePattern("Field SimpleOp Literal"),
+		CreateNode: func(params []Node) Node {
+			field := string(params[0].(SrcNode))
+			argument := string(params[2].(SrcNode))
+
+			switch params[1].(SrcNode) {
+			case "==":
+				return OpEq{field: field, argument: argument}
+			case "!=":
+				return OpNe{field: field, argument: argument}
+			case ">":
+				return OpGt{field: field, argument: argument}
+			case ">=":
+				return OpGe{field: field, argument: argument}
+			case "<":
+				return OpLt{field: field, argument: argument}
+			case "<=":
+				return OpLe{field: field, argument: argument}
+			default:
+				return OpError{}
+			}
+		},
+	},
+	// TODO: IS NULL, IN (), NOT
+	{
+		Pattern: parsePattern("BoolExpr AND BoolExpr"),
+		CreateNode: func(params []Node) Node {
+			return OpAnd{
+				x: params[0].(BoolExpr),
+				y: params[2].(BoolExpr),
+			}
+		},
+	},
+	{
+		Pattern: parsePattern("BoolExpr OR BoolExpr"),
+		CreateNode: func(params []Node) Node {
+			return OpOr{
+				x: params[0].(BoolExpr),
+				y: params[2].(BoolExpr),
+			}
+		},
+	},
+	{
+		Pattern: parsePattern("( BoolExpr )"),
+		CreateNode: func(params []Node) Node {
+			return params[1]
+		},
+	},
+}
+
+func parsePattern(pattern string) []NodeType {
+	strPattern := reSplitBySpaces.Split(pattern, -1)
+	result := make([]NodeType, 0, len(strPattern))
+	for _, item := range strPattern {
+		result = append(result, NodeType(item))
+	}
+
+	return result
 }
 
 var (
-	rValidKey = regexp.MustCompile("^[a-zA0-9_]+$")
-	rNumbers  = regexp.MustCompile("^-?[0-9.]+$")
-	rString   = regexp.MustCompile("^('.*')|(\".*\")$")
+	reField         = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
+	reValidKey      = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
+	reNumbers       = regexp.MustCompile("^-?[0-9.]+$")
+	reString        = regexp.MustCompile("^('.*')|(\".*\")$")
+	reSplitBySpaces = regexp.MustCompile(`\s+`)
 )
 
 func split(in string) map[string]string {
@@ -55,20 +160,48 @@ func split(in string) map[string]string {
 	return result
 }
 
-func parse(expr string, fields []string) (Operator, error) {
-	log.Printf("Source: %s", expr)
-	tokens := tokenize(expr, fields)
-	if err := validate(tokens, fields); err != nil {
+func parse(expr string, fields []string) (BoolExpr, error) {
+	rawTokens := tokenize(expr, fields)
+	log.Printf("Source: %#v", rawTokens)
+	if err := validate(rawTokens, fields); err != nil {
 		return nil, err
 	}
-	for i, value := range tokens {
-		if isSplitter(value) {
-			buildNode(i, tokens)
-			// TODO recursively build nodes tree
-			//return buildNode(i, tokens), nil
-		}
+
+	tokens := make([]Node, 0, len(rawTokens))
+	for _, item := range rawTokens {
+		tokens = append(tokens, SrcNode(item))
 	}
-	return nil, errors.New("no operators defined")
+
+	for _, rule := range rules {
+		if len(rule.Pattern) > len(tokens) {
+			continue
+		}
+
+		newTokens := []Node{}
+		i := 0
+
+	ShiftRigth:
+		for i < len(tokens) { // iterate by tokens for each rule
+			params := []Node{}
+			for _, ruleElem := range rule.Pattern {
+				nextToken := tokens[i]
+				params = append(params, nextToken)
+				i++
+				if ruleElem != nextToken.Type() || i >= len(tokens) {
+					// pattern NOT match or tokens is finished, pass old tokens
+					newTokens = append(newTokens, params...)
+					continue ShiftRigth
+				}
+			}
+			// pattern match! replace by new Node
+			newTokens = append(newTokens, rule.CreateNode(params))
+		}
+
+		tokens = newTokens
+		pp.Println(tokens)
+	} // rules
+
+	return nil, nil
 }
 
 // validates the tokenized expression
@@ -142,107 +275,6 @@ func validate(tokens, fields []string) error {
 	return nil
 }
 
-// extracts part to the left of i until the unpaired "(" or the beginning
-func extractLeft(i int, tokens []string) []string {
-	var left []string
-	for j := i - 1; j >= 0; j-- {
-		if tokens[j] == ")" {
-			for {
-				if tokens[j] == "(" {
-					j--
-					break
-				}
-				j--
-			}
-		}
-		if tokens[j] == "(" || j == 0 {
-			left = tokens[j:i]
-			break
-		}
-	}
-	return left
-}
-
-// extracts part to the right or i until the unpaired ")" or the ending
-func extractRight(i int, tokens []string) []string {
-	var right []string
-	for j := i + 1; j < len(tokens); j++ {
-		if tokens[j] == "(" {
-			for {
-				if tokens[j] == ")" {
-					j++
-					break
-				}
-				j++
-			}
-		}
-		if tokens[j] == ")" || j == len(tokens)-1 {
-			right = tokens[i+1 : j+1]
-			break
-		}
-	}
-	return right
-}
-
-// recursively build operators tree
-func buildNode(i int, tokens []string) Operator {
-	switch tokens[i] {
-	case "==":
-		arg1, arg2 := tokens[i-1], tokens[i+1]
-		// TODO
-		log.Printf("EQ: %s == %s", arg1, arg2)
-	case "!=":
-		arg1, arg2 := tokens[i-1], tokens[i+1]
-		// TODO
-		log.Printf("NE: %s != %s", arg1, arg2)
-	case ">":
-		arg1, arg2 := tokens[i-1], tokens[i+1]
-		// TODO
-		log.Printf("GT: %s > %s", arg1, arg2)
-	case "<":
-		arg1, arg2 := tokens[i-1], tokens[i+1]
-		// TODO
-		log.Printf("LT: %s < %s", arg1, arg2)
-	case ">=":
-		arg1, arg2 := tokens[i-1], tokens[i+1]
-		// TODO
-		log.Printf("GE: %s >= %s", arg1, arg2)
-	case "<=":
-		arg1, arg2 := tokens[i-1], tokens[i+1]
-		// TODO
-		log.Printf("LE: %s <= %s", arg1, arg2)
-	case "AND":
-		left, right := extractLeft(i, tokens), extractRight(i, tokens)
-		// TODO
-		log.Printf("AND: %v AND %v", left, right)
-	case "OR":
-		left, right := extractLeft(i, tokens), extractRight(i, tokens)
-		// TODO
-		log.Printf("OR: %v OR %v", left, right)
-	case "IN":
-		arg1 := tokens[i-1]
-		var arg2 []string
-		for j := i + 1; j < len(tokens); j++ {
-			if tokens[j] == ")" {
-				arg2 = tokens[i+2 : j]
-				break
-			}
-		}
-		// TODO
-		log.Printf("IN: %s IN %v", arg1, arg2)
-	case "IS NULL":
-		arg := tokens[i-1]
-		// TODO
-		log.Printf("IS NULL: %s", arg)
-	case "(": // do nothing
-	case ")": // do nothing
-	case ",": // do nothing
-	default:
-		log.Fatalf("Unknown operator %q at position %d", tokens[i], i)
-	}
-	return OperatorStub{} // TODO
-}
-
 var (
 	splitters = map[string]string{
 		"(":       "",
@@ -271,7 +303,7 @@ func isSplitter(value string) bool {
 }
 
 func isValue(value string) bool {
-	return rNumbers.MatchString(value) || rString.MatchString(value)
+	return reNumbers.MatchString(value) || reString.MatchString(value)
 }
 
 func isField(value string, fields []string) bool {

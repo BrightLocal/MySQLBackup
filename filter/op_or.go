@@ -2,7 +2,11 @@ package filter
 
 // OpOr - OR operation
 type OpOr struct {
-	x, y Operator
+	x, y BoolExpr
+}
+
+func (o OpOr) Type() NodeType {
+	return "BoolExpr"
 }
 
 func (o OpOr) Value(data map[string]interface{}) (bool, error) {

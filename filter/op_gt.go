@@ -8,6 +8,10 @@ type OpGt struct {
 	argument interface{}
 }
 
+func (o OpGt) Type() NodeType {
+	return "BoolExpr"
+}
+
 func (o OpGt) Value(data map[string]interface{}) (bool, error) {
 	if value, ok := data[o.field]; !ok {
 		return false, errors.Wrapf(errFieldNotFound, "for '>' operation")

@@ -2,7 +2,11 @@ package filter
 
 // OpNot - NOT operation
 type OpNot struct {
-	x Operator
+	x BoolExpr
+}
+
+func (o OpNot) Type() NodeType {
+	return "BoolExpr"
 }
 
 func (o OpNot) Value(data map[string]interface{}) (bool, error) {

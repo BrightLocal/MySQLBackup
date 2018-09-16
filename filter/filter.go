@@ -4,15 +4,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Operator interface {
-	Value(data map[string]interface{}) (bool, error)
-}
-
-type FilterSet map[string]Operator
+type FilterSet map[string]BoolExpr
 
 type Filter struct {
 	tableName string
-	expr      Operator
+	expr      BoolExpr
 }
 
 var (
@@ -38,6 +34,6 @@ func NewFilterSet(expression string, tableFields map[string][]string) (result Fi
 
 // NewFilter returns new filter for table expression:
 // "table_name", "field == val OR field2 > 5"
-func NewFilter(expression string, fields []string) (Operator, error) {
+func NewFilter(expression string, fields []string) (BoolExpr, error) {
 	return parse(expression, fields)
 }
