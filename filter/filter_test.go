@@ -61,6 +61,21 @@ func TestFilter(t *testing.T) {
 			expression: `foo == "val" OR bar != 123`,
 			want:       false,
 		},
+		{
+			name:         "not found field",
+			data:         map[string]interface{}{"foo": "val1", "bar": 123},
+			expression:   `foo == "val" OR bar2 != 123`,
+			want:         false,
+			wantParseErr: true,
+		},
+		{
+			name:         "types mismatch",
+			data:         map[string]interface{}{"foo": "val", "bar": 123},
+			expression:   `foo > 123 OR bar != 123`,
+			want:         false,
+			wantParseErr: false,
+			wantErr:      true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -75,14 +90,22 @@ func TestFilter(t *testing.T) {
 				t.Errorf("NewFilter() error = %v, wantErr %v", err, tt.wantParseErr)
 				return
 			}
+			if err != nil {
+				return
+			}
 
 			want, err := got.Value(tt.data)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Value() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			if err != nil {
+				return
+			}
+
 			if want != tt.want {
 				t.Errorf("Value() = %v, want %v", want, tt.want)
+				return
 			}
 		})
 	}
