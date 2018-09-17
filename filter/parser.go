@@ -44,6 +44,8 @@ func (sn SrcNode) Type() NodeType {
 		return "OR"
 	case sn == "NOT":
 		return "NOT"
+	case sn == "IS NULL":
+		return "IS_NULL"
 	case sn.isSimpleOp():
 		return "SimpleOp"
 	case reField.MatchString(string(sn)):
@@ -101,7 +103,15 @@ var rules = []Rule{
 			}
 		},
 	},
-	// TODO: IS NULL, IN ()
+	// TODO: IN ()
+	{
+		Pattern: parsePattern("Field IS_NULL"),
+		CreateNode: func(params []Node) Node {
+			return OpIsNull{
+				field: string(params[0].(SrcNode)),
+			}
+		},
+	},
 	{
 		Pattern: parsePattern("NOT BoolExpr"),
 		CreateNode: func(params []Node) Node {

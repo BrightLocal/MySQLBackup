@@ -62,6 +62,24 @@ func TestFilter(t *testing.T) {
 			want:       false,
 		},
 		{
+			name:       "IS NULL",
+			data:       map[string]interface{}{"foo": nil},
+			expression: `foo IS NULL`,
+			want:       true,
+		},
+		{
+			name:       "IS NULL - false",
+			data:       map[string]interface{}{"foo": "val"},
+			expression: `foo IS NULL`,
+			want:       false,
+		},
+		{
+			name:       "NOT IS NULL",
+			data:       map[string]interface{}{"foo": nil},
+			expression: `NOT foo IS NULL`,
+			want:       false,
+		},
+		{
 			name:       "simple one op with string, !=",
 			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
 			expression: `foo == "val another"`,
