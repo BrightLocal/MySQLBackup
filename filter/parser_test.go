@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -16,7 +17,7 @@ func TestParser(t *testing.T) {
 	for key, expression := range out {
 		key = strings.TrimSpace(key)
 		expression = strings.TrimSpace(expression)
-		if reValidKey.MatchString(key) {
+		if regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`).MatchString(key) {
 			if nodes, err := parse(expression, fields[key]); err != nil {
 				t.Error(err)
 			} else {

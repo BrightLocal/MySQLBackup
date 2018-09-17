@@ -57,7 +57,6 @@ func (sn SrcNode) Type() NodeType {
 
 var (
 	reField         = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
-	reValidKey      = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
 	reNumbers       = regexp.MustCompile("^-?[0-9.]+$")
 	reString        = regexp.MustCompile("^('.*')|(\".*\")$")
 	reSplitBySpaces = regexp.MustCompile(`\s+`)
