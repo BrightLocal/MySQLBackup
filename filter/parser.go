@@ -73,7 +73,7 @@ var rules = []Rule{
 			switch {
 			case reNumbers.MatchString(argumentStr):
 				if parsedInt64, err := strconv.ParseInt(argumentStr, 10, 64); err != nil {
-					return OpError{fmt.Sprintf("failed to parse int value: %v", argumentStr)}
+					return OpError{errorMsg: fmt.Sprintf("failed to parse int value: %v", argumentStr)}
 				} else {
 					argument = int(parsedInt64)
 				}
@@ -97,7 +97,7 @@ var rules = []Rule{
 			case "<=":
 				return OpLe{field: field, argument: argument}
 			default:
-				return OpError{fmt.Sprintf("not known operation: %v", params[1])}
+				return OpError{errorMsg: fmt.Sprintf("not known operation: %v", params[1])}
 			}
 		},
 	},
