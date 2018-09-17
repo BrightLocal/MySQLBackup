@@ -38,6 +38,18 @@ func TestFilter(t *testing.T) {
 			want:       true,
 		},
 		{
+			name:       "simple one op with NOT",
+			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
+			expression: `NOT (foo == "val1")`,
+			want:       false,
+		},
+		{
+			name:       "simple one op with NOT",
+			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
+			expression: `NOT foo == "val1"`,
+			want:       false,
+		},
+		{
 			name:       "simple one op with string, !=",
 			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
 			expression: `foo == "val another"`,

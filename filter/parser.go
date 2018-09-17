@@ -42,6 +42,8 @@ func (sn SrcNode) Type() NodeType {
 		return "AND"
 	case sn == "OR":
 		return "OR"
+	case sn == "NOT":
+		return "NOT"
 	case sn.isSimpleOp():
 		return "SimpleOp"
 	case reField.MatchString(string(sn)):
@@ -101,7 +103,15 @@ var rules = []Rule{
 			}
 		},
 	},
-	// TODO: IS NULL, IN (), NOT
+	// TODO: IS NULL, IN ()
+	{
+		Pattern: parsePattern("NOT BoolExpr"),
+		CreateNode: func(params []Node) Node {
+			return OpNot{
+				x: params[1].(BoolExpr),
+			}
+		},
+	},
 	{
 		Pattern: parsePattern("BoolExpr AND BoolExpr"),
 		CreateNode: func(params []Node) Node {
@@ -227,7 +237,7 @@ func parse(expr string, fields []string) (BoolExpr, error) {
 	}
 
 	if len(tokens) != 1 {
-		return nil, errors.Errorf("there were not recognized tokens: %+v", tokens)
+		return nil, errors.Errorf("there were not recognized tokens: %#v", tokens)
 	}
 	if tokens[0].Type() != "BoolExpr" {
 		return nil, errors.Errorf("result operation isn't bool expression: %+v", tokens[0].Type())
