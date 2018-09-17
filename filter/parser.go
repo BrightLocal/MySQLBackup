@@ -3,6 +3,7 @@ package filter
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -54,12 +55,34 @@ func (sn SrcNode) Type() NodeType {
 	}
 }
 
+var (
+	reField         = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
+	reValidKey      = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
+	reNumbers       = regexp.MustCompile("^-?[0-9.]+$")
+	reString        = regexp.MustCompile("^('.*')|(\".*\")$")
+	reSplitBySpaces = regexp.MustCompile(`\s+`)
+)
+
 var rules = []Rule{
 	{
 		Pattern: parsePattern("Field SimpleOp Literal"),
 		CreateNode: func(params []Node) Node {
 			field := string(params[0].(SrcNode))
-			argument := string(params[2].(SrcNode))
+
+			argumentStr := string(params[2].(SrcNode))
+			var argument interface{}
+			switch {
+			case reNumbers.MatchString(argumentStr):
+				if parsedInt64, err := strconv.ParseInt(argumentStr, 10, 64); err != nil {
+					return OpError{fmt.Sprintf("failed to parse int value: %v", argumentStr)}
+				} else {
+					argument = int(parsedInt64)
+				}
+			case reString.MatchString(argumentStr):
+				argument = argumentStr[1 : len(argumentStr)-1]
+			default:
+				// TODO parse float64
+			}
 
 			switch params[1].(SrcNode) {
 			case "==":
@@ -75,7 +98,7 @@ var rules = []Rule{
 			case "<=":
 				return OpLe{field: field, argument: argument}
 			default:
-				return OpError{}
+				return OpError{fmt.Sprintf("not known operation: %v", params[1])}
 			}
 		},
 	},
@@ -116,14 +139,6 @@ func parsePattern(pattern string) []NodeType {
 	return result
 }
 
-var (
-	reField         = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
-	reValidKey      = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
-	reNumbers       = regexp.MustCompile("^-?[0-9.]+$")
-	reString        = regexp.MustCompile("^('.*')|(\".*\")$")
-	reSplitBySpaces = regexp.MustCompile(`\s+`)
-)
-
 func split(in string) map[string]string {
 	result := make(map[string]string)
 	key := ""
@@ -162,6 +177,9 @@ func parse(expr string, fields []string) (BoolExpr, error) {
 	rawTokens := tokenize(expr, fields)
 	if err := validate(rawTokens, fields); err != nil {
 		return nil, err
+	}
+	if len(rawTokens) == 0 {
+		return OpNop{}, nil
 	}
 
 	tokens := make([]Node, 0, len(rawTokens))

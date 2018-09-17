@@ -3,6 +3,7 @@ package filter
 import "github.com/pkg/errors"
 
 type OpError struct {
+	errorMsg string
 }
 
 func (o OpError) Type() NodeType {
@@ -10,5 +11,5 @@ func (o OpError) Type() NodeType {
 }
 
 func (o OpError) Value(data map[string]interface{}) (bool, error) {
-	return false, errors.New("TODO ERROR")
+	return false, errors.New(o.errorMsg)
 }
