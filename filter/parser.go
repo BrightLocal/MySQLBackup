@@ -72,17 +72,15 @@ var rules = []Rule{
 
 			argumentStr := string(params[2].(SrcNode))
 			var argument interface{}
-			switch {
-			case reNumbers.MatchString(argumentStr):
-				if parsedInt64, err := strconv.ParseInt(argumentStr, 10, 64); err != nil {
-					return OpError{errorMsg: fmt.Sprintf("failed to parse int value: %v", argumentStr)}
-				} else {
-					argument = int(parsedInt64)
-				}
-			case reString.MatchString(argumentStr):
+
+			if reString.MatchString(argumentStr) {
 				argument = argumentStr[1 : len(argumentStr)-1]
-			default:
-				// TODO parse float64
+			} else if parsedInt64, err := strconv.ParseInt(argumentStr, 10, 64); err == nil {
+				argument = int(parsedInt64)
+			} else if parsedFloat64, err := strconv.ParseFloat(argumentStr, 64); err == nil {
+				argument = parsedFloat64
+			} else {
+				return OpError{errorMsg: fmt.Sprintf("failed to parse literal: %v", argumentStr)}
 			}
 
 			switch params[1].(SrcNode) {

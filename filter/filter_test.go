@@ -32,6 +32,18 @@ func TestFilter(t *testing.T) {
 			want:       true,
 		},
 		{
+			name:       "simple one op with float",
+			data:       map[string]interface{}{"foo": 123.5, "bar": "val2"},
+			expression: `foo > 123.1`,
+			want:       true,
+		},
+		{
+			name:       "simple one op with float (false result)",
+			data:       map[string]interface{}{"foo": 123.5, "bar": "val2"},
+			expression: `foo < 123.1`,
+			want:       false,
+		},
+		{
 			name:       "simple one op with string",
 			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
 			expression: `foo == "val1"`,
