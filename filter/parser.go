@@ -2,7 +2,6 @@ package filter
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
@@ -161,7 +160,6 @@ func split(in string) map[string]string {
 
 func parse(expr string, fields []string) (BoolExpr, error) {
 	rawTokens := tokenize(expr, fields)
-	log.Printf("Source: %#v", rawTokens)
 	if err := validate(rawTokens, fields); err != nil {
 		return nil, err
 	}

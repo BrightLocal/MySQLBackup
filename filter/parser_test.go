@@ -11,6 +11,7 @@ func TestParser(t *testing.T) {
 	}
 
 	in1 := `table_1((foo == "val" OR world > 233) AND bar != 123)`
+	t.Logf("expression: %v", in1)
 	out := split(in1)
 	for key, expression := range out {
 		key = strings.TrimSpace(key)
