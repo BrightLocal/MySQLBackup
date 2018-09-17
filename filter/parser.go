@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 )
 
@@ -172,36 +171,54 @@ func parse(expr string, fields []string) (BoolExpr, error) {
 		tokens = append(tokens, SrcNode(item))
 	}
 
-	for _, rule := range rules {
-		if len(rule.Pattern) > len(tokens) {
-			continue
-		}
+	applyRulesCount := 1
+	for applyRulesCount > 0 {
+		applyRulesCount = 0
 
-		newTokens := []Node{}
-		i := 0
-
-	ShiftRigth:
-		for i < len(tokens) { // iterate by tokens for each rule
-			params := []Node{}
-			for _, ruleElem := range rule.Pattern {
-				nextToken := tokens[i]
-				params = append(params, nextToken)
-				i++
-				if ruleElem != nextToken.Type() || i >= len(tokens) {
-					// pattern NOT match or tokens is finished, pass old tokens
-					newTokens = append(newTokens, params...)
-					continue ShiftRigth
-				}
+		for _, rule := range rules {
+			if len(rule.Pattern) > len(tokens) {
+				continue
 			}
-			// pattern match! replace by new Node
-			newTokens = append(newTokens, rule.CreateNode(params))
-		}
 
-		tokens = newTokens
-		pp.Println(tokens)
-	} // rules
+			newTokens := []Node{}
+			i := 0
 
-	return nil, nil
+		ShiftRigth:
+			for i < len(tokens) { // iterate by tokens for each rule
+				params := []Node{}
+				for _, ruleElem := range rule.Pattern {
+					if i == len(tokens) {
+						// rule length > tail of tokens, pass rest of tokens as is
+						newTokens = append(newTokens, params...)
+						continue ShiftRigth
+					}
+
+					nextToken := tokens[i]
+					params = append(params, nextToken)
+					i++
+					if ruleElem != nextToken.Type() {
+						// pattern NOT match or tokens is finished, pass old tokens
+						newTokens = append(newTokens, params...)
+						continue ShiftRigth
+					}
+				}
+				// pattern match! replace by new Node
+				applyRulesCount++
+				newTokens = append(newTokens, rule.CreateNode(params))
+			}
+
+			tokens = newTokens
+		} // rules
+	}
+
+	if len(tokens) != 1 {
+		return nil, errors.Errorf("there were not recognized tokens: %+v", tokens)
+	}
+	if tokens[0].Type() != "BoolExpr" {
+		return nil, errors.Errorf("result operation isn't bool expression: %+v", tokens[0].Type())
+	}
+
+	return tokens[0].(BoolExpr), nil
 }
 
 // validates the tokenized expression
