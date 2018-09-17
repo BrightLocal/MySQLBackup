@@ -22,7 +22,13 @@ type BoolExpr interface {
 
 type Rule struct {
 	CreateNode func(params []Node) Node
-	Pattern    []NodeType
+	Pattern    []RuleItem
+}
+
+type RuleItem struct {
+	Type     NodeType
+	MinCount int // item with modificators '*','+','?' like "... IN ( Literal* )"
+	MaxCount int
 }
 
 type SrcNode string
@@ -44,6 +50,8 @@ func (sn SrcNode) Type() NodeType {
 		return "OR"
 	case sn == "NOT":
 		return "NOT"
+	case sn == "IN":
+		return "IN"
 	case sn == "IS NULL":
 		return "IS_NULL"
 	case sn.isSimpleOp():
@@ -72,17 +80,9 @@ var rules = []Rule{
 		CreateNode: func(params []Node) Node {
 			field := string(params[0].(SrcNode))
 
-			argumentStr := string(params[2].(SrcNode))
-			var argument interface{}
-
-			if reString.MatchString(argumentStr) {
-				argument = argumentStr[1 : len(argumentStr)-1]
-			} else if parsedInt64, err := strconv.ParseInt(argumentStr, 10, 64); err == nil {
-				argument = int(parsedInt64)
-			} else if parsedFloat64, err := strconv.ParseFloat(argumentStr, 64); err == nil {
-				argument = parsedFloat64
-			} else {
-				return OpError{errorMsg: fmt.Sprintf("failed to parse literal: %v", argumentStr)}
+			argument, err := parseLiteral(string(params[2].(SrcNode)))
+			if err != nil {
+				return OpError{errorMsg: err.Error()}
 			}
 
 			switch params[1].(SrcNode) {
@@ -103,12 +103,33 @@ var rules = []Rule{
 			}
 		},
 	},
-	// TODO: IN ()
 	{
 		Pattern: parsePattern("Field IS_NULL"),
 		CreateNode: func(params []Node) Node {
 			return OpIsNull{
 				field: string(params[0].(SrcNode)),
+			}
+		},
+	},
+	{
+		Pattern: parsePattern("Field IN ( Literal )"),
+		CreateNode: func(params []Node) Node {
+			if len(params) < 5 {
+				return OpError{errorMsg: fmt.Sprintf("not enough arguments for IN operation: %+v", params)}
+			}
+
+			arguments := []interface{}{}
+			for _, item := range params[3 : len(params)-1] {
+				literal, err := parseLiteral(string(item.(SrcNode)))
+				if err != nil {
+					return OpError{errorMsg: err.Error()}
+				}
+				arguments = append(arguments, literal)
+			}
+
+			return OpIn{
+				field:     string(params[0].(SrcNode)),
+				arguments: arguments,
 			}
 		},
 	},
@@ -146,11 +167,43 @@ var rules = []Rule{
 	},
 }
 
-func parsePattern(pattern string) []NodeType {
+func parseLiteral(in string) (interface{}, error) {
+	var result interface{}
+
+	if reString.MatchString(in) {
+		result = in[1 : len(in)-1]
+	} else if parsedInt64, err := strconv.ParseInt(in, 10, 64); err == nil {
+		result = int(parsedInt64)
+	} else if parsedFloat64, err := strconv.ParseFloat(in, 64); err == nil {
+		result = parsedFloat64
+	} else {
+		return nil, errors.Errorf("failed to parse literal: %v", in)
+	}
+
+	return result, nil
+}
+
+func parsePattern(pattern string) []RuleItem {
 	strPattern := reSplitBySpaces.Split(pattern, -1)
-	result := make([]NodeType, 0, len(strPattern))
+	result := make([]RuleItem, 0, len(strPattern))
 	for _, item := range strPattern {
-		result = append(result, NodeType(item))
+
+		if strings.HasSuffix(item, "+") {
+			// TODO handle repeat count
+			item = strings.TrimRight(item, "+")
+			result = append(result, RuleItem{
+				Type: NodeType(item),
+			})
+		}
+
+		if strings.HasSuffix(item, "*") {
+			item = strings.TrimRight(item, "*")
+			// TODO handle repeat count
+		}
+
+		result = append(result, RuleItem{
+			Type: NodeType(item),
+		})
 	}
 
 	return result
@@ -229,7 +282,7 @@ func parse(expr string, fields []string) (BoolExpr, error) {
 					nextToken := tokens[i]
 					params = append(params, nextToken)
 					i++
-					if ruleElem != nextToken.Type() {
+					if ruleElem.Type != nextToken.Type() {
 						// pattern NOT match or tokens is finished, pass old tokens
 						newTokens = append(newTokens, params...)
 						continue ShiftRigth
@@ -247,11 +300,12 @@ func parse(expr string, fields []string) (BoolExpr, error) {
 	if len(tokens) != 1 {
 		return nil, errors.Errorf("there were not recognized tokens: %#v", tokens)
 	}
-	if tokens[0].Type() != "BoolExpr" {
-		return nil, errors.Errorf("result operation isn't bool expression: %+v", tokens[0].Type())
-	}
 
-	return tokens[0].(BoolExpr), nil
+	if boolExpr, ok := tokens[0].(BoolExpr); !ok {
+		return nil, errors.Errorf("result operation isn't bool expression: %+v", tokens[0].Type())
+	} else {
+		return boolExpr, nil
+	}
 }
 
 // validates the tokenized expression
