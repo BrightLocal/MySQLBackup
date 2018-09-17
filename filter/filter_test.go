@@ -26,10 +26,40 @@ func TestFilter(t *testing.T) {
 			want:       true,
 		},
 		{
+			name:       "simple one op with number, >",
+			data:       map[string]interface{}{"foo": 123, "bar": "val2"},
+			expression: `foo > 120`,
+			want:       true,
+		},
+		{
 			name:       "simple one op with string",
 			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
 			expression: `foo == "val1"`,
 			want:       true,
+		},
+		{
+			name:       "simple one op with string, !=",
+			data:       map[string]interface{}{"foo": "val1", "bar": "val2"},
+			expression: `foo == "val another"`,
+			want:       false,
+		},
+		{
+			name:       "AND op",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `foo == "val1" AND bar == 123`,
+			want:       true,
+		},
+		{
+			name:       "OR op",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `foo == "val1" OR bar == 121`,
+			want:       true,
+		},
+		{
+			name:       "OR op with false",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `foo == "val" OR bar != 123`,
+			want:       false,
 		},
 	}
 
