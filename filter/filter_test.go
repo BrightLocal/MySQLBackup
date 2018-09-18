@@ -126,7 +126,8 @@ func TestFilter(t *testing.T) {
 			data:         map[string]interface{}{"foo": "val1", "bar": 123},
 			expression:   `foo == "val" OR bar2 != 123`,
 			want:         false,
-			wantParseErr: true,
+			wantParseErr: false,
+			wantErr:      true,
 		},
 		{
 			name:         "types mismatch",
@@ -140,12 +141,7 @@ func TestFilter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fields := []string{}
-			for key := range tt.data {
-				fields = append(fields, key)
-			}
-
-			got, err := NewFilter(tt.expression, fields)
+			got, err := NewFilter(tt.expression)
 			if (err != nil) != tt.wantParseErr {
 				t.Errorf("NewFilter() error = %v, wantErr %v", err, tt.wantParseErr)
 				return

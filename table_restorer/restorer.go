@@ -30,7 +30,7 @@ type Restorer struct {
 	colNum    int
 	query     string
 	dryRun    bool
-	filter    *filter.Filter
+	filter    filter.BoolExpr
 }
 
 func New(dsn, tableName string, columns []string) *Restorer {
@@ -56,7 +56,7 @@ func (r *Restorer) WithDryRun(dryRun bool) *Restorer {
 	return r
 }
 
-func (r *Restorer) WithFilter(filter *filter.Filter) *Restorer {
+func (r *Restorer) WithFilter(filter filter.BoolExpr) *Restorer {
 	r.filter = filter
 	return r
 }
@@ -75,9 +75,9 @@ func (r *Restorer) Run(in io.Reader, conn *sqlx.DB) (stats, error) {
 			continue
 		}
 		if r.filter != nil {
-			if passes, err := r.filter.Passes(dataAsMap); err != nil {
+			if doPass, err := r.filter.Value(dataAsMap); err != nil {
 				return stats{}, err
-			} else if !passes {
+			} else if !doPass {
 				continue // skip row by filter expression
 			}
 		}

@@ -243,9 +243,9 @@ func split(in string) map[string]string {
 	return result
 }
 
-func parse(expr string, fields []string) (BoolExpr, error) {
-	rawTokens := tokenize(expr, fields)
-	if err := validate(rawTokens, fields); err != nil {
+func parse(expr string) (BoolExpr, error) {
+	rawTokens := tokenize(expr)
+	if err := validate(rawTokens); err != nil {
 		return nil, err
 	}
 	if len(rawTokens) == 0 {
@@ -309,16 +309,16 @@ func parse(expr string, fields []string) (BoolExpr, error) {
 }
 
 // validates the tokenized expression
-func validate(tokens, fields []string) error {
+func validate(tokens []string) error {
 	bracesCount := 0
 	for i, p := range tokens {
-		if !(isSplitter(p) || isValue(p) || isField(p, fields)) {
+		if !(isSplitter(p) || isValue(p) || isField(p)) {
 			return errors.New(fmt.Sprintf("unknown token %q at position %d", p, i))
 		}
 		switch p {
 		case "(": // "( field", "( value"
 			bracesCount++
-			if i == len(tokens)-1 || !(isField(tokens[i+1], fields) || isValue(tokens[i+1])) {
+			if i == len(tokens)-1 || !(isField(tokens[i+1]) || isValue(tokens[i+1])) {
 				return errors.New("expected field or value after opening brace")
 			}
 			continue
@@ -362,11 +362,11 @@ func validate(tokens, fields []string) error {
 			if i == len(tokens)-1 {
 				return errors.New("unexpected end of " + p)
 			}
-			if !(tokens[i+1] == "(" || isValue(tokens[i+1]) || isField(tokens[i+1], fields)) {
+			if !(tokens[i+1] == "(" || isValue(tokens[i+1]) || isField(tokens[i+1])) {
 				errors.New("expected field or value or opening brace after " + p)
 			}
 		case "IS NULL": // "field IS NULL"
-			if !isField(tokens[i-1], fields) {
+			if !isField(tokens[i-1]) {
 				errors.New("expected field before IS NULL")
 			}
 		}
@@ -399,7 +399,7 @@ var (
 	}
 )
 
-const maxTokenLen = 7 // the longest splitter length
+const maxTokenLen = 64 // the longest splitter length
 
 func isSplitter(value string) bool {
 	_, ok := splitters[value]
@@ -410,31 +410,18 @@ func isValue(value string) bool {
 	return reNumbers.MatchString(value) || reString.MatchString(value)
 }
 
-func isField(value string, fields []string) bool {
-	for _, f := range fields {
-		if value == f {
-			return true
-		}
-	}
-	return false
+func isField(value string) bool {
+	return reField.MatchString(value)
 }
 
-func tokenize(expr string, fields []string) []string {
-	tokenLen := maxTokenLen
-	f := make(map[string]string, len(fields))
-	for _, field := range fields {
-		f[field] = "field"
-		if l := len(field); l > maxTokenLen {
-			tokenLen = l
-		}
-	}
+func tokenize(expr string) []string {
 	l := len(expr)
 	pos := 0
 	token := ""
 	var tokens []string
 a:
 	for pos < l {
-		for i := tokenLen; i > 0; i-- {
+		for i := maxTokenLen; i > 0; i-- {
 			s := substr(&expr, pos, i)
 			if isSplitter(s) {
 				if token != "" {

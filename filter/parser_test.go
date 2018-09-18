@@ -7,10 +7,6 @@ import (
 )
 
 func TestParser(t *testing.T) {
-	fields := map[string][]string{
-		"table_1": {"hello", "world", "foo", "bar"},
-	}
-
 	in1 := `table_1((foo == "val" OR world > 233) AND bar != 123)`
 	t.Logf("expression: %v", in1)
 	out := split(in1)
@@ -18,7 +14,7 @@ func TestParser(t *testing.T) {
 		key = strings.TrimSpace(key)
 		expression = strings.TrimSpace(expression)
 		if regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`).MatchString(key) {
-			if nodes, err := parse(expression, fields[key]); err != nil {
+			if nodes, err := parse(expression); err != nil {
 				t.Error(err)
 			} else {
 				t.Logf("result node: %#v", nodes)
