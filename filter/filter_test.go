@@ -104,6 +104,30 @@ func TestFilter(t *testing.T) {
 			want:       true,
 		},
 		{
+			name:       "IN op with two element",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `bar IN (123, 456)`,
+			want:       true,
+		},
+		{
+			name:       "IN op with three element",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `bar IN (123, 456, "dwed")`,
+			want:       true,
+		},
+		{
+			name:       "IN op with three element and NOT",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `NOT bar IN (123, 456, "dwed")`,
+			want:       false,
+		},
+		{
+			name:       "IN op with three element and NOT - false",
+			data:       map[string]interface{}{"foo": "val1", "bar": 123},
+			expression: `NOT bar IN (1232, 456, "dwed")`,
+			want:       true,
+		},
+		{
 			name:       "IN op with one element - false",
 			data:       map[string]interface{}{"foo": "val1", "bar": 123},
 			expression: `bar IN (100)`,

@@ -26,9 +26,13 @@ type Rule struct {
 }
 
 type RuleItem struct {
-	Type     NodeType
+	nodeType NodeType
 	MinCount int // item with modificators '*','+','?' like "... IN ( Literal* )"
 	MaxCount int
+}
+
+func (ri RuleItem) Type() NodeType {
+	return ri.nodeType
 }
 
 type SrcNode string
@@ -112,7 +116,7 @@ var rules = []Rule{
 		},
 	},
 	{
-		Pattern: parsePattern("Field IN ( Literal )"),
+		Pattern: parsePattern("Field IN ( Literal+ )"),
 		CreateNode: func(params []Node) Node {
 			if len(params) < 5 {
 				return OpError{errorMsg: fmt.Sprintf("not enough arguments for IN operation: %+v", params)}
@@ -187,22 +191,27 @@ func parsePattern(pattern string) []RuleItem {
 	strPattern := reSplitBySpaces.Split(pattern, -1)
 	result := make([]RuleItem, 0, len(strPattern))
 	for _, item := range strPattern {
+		minCount, maxCount := 1, 1
 
 		if strings.HasSuffix(item, "+") {
-			// TODO handle repeat count
 			item = strings.TrimRight(item, "+")
-			result = append(result, RuleItem{
-				Type: NodeType(item),
-			})
+			minCount, maxCount = 1, -1
 		}
 
 		if strings.HasSuffix(item, "*") {
 			item = strings.TrimRight(item, "*")
-			// TODO handle repeat count
+			minCount, maxCount = 0, -1
+		}
+
+		if strings.HasSuffix(item, "?") {
+			item = strings.TrimRight(item, "?")
+			minCount, maxCount = 0, 1
 		}
 
 		result = append(result, RuleItem{
-			Type: NodeType(item),
+			nodeType: NodeType(item),
+			MinCount: minCount,
+			MaxCount: maxCount,
 		})
 	}
 
@@ -243,6 +252,32 @@ func split(in string) map[string]string {
 	return result
 }
 
+// maxCount == -1 is infinity
+func getMatchedChunk(what RuleItem, in []Node) (head []Node, tail []Node, ok bool) {
+	ok = false
+
+	i := 0
+	for i < len(in) && what.Type() == in[i].Type() {
+		head = append(head, in[i])
+
+		if i+1 >= what.MinCount {
+			ok = true
+		}
+		if what.MaxCount != -1 && i+1 >= what.MaxCount {
+			break
+		}
+		i++
+	}
+
+	if !ok && what.MinCount == 0 {
+		return nil, in, true
+	} else if !ok {
+		return nil, in, false
+	}
+
+	return head, in[len(head):], true
+}
+
 func parse(expr string) (BoolExpr, error) {
 	rawTokens := tokenize(expr)
 	if err := validate(rawTokens); err != nil {
@@ -254,6 +289,9 @@ func parse(expr string) (BoolExpr, error) {
 
 	tokens := make([]Node, 0, len(rawTokens))
 	for _, item := range rawTokens {
+		if item == "," {
+			continue
+		}
 		tokens = append(tokens, SrcNode(item))
 	}
 
@@ -267,26 +305,23 @@ func parse(expr string) (BoolExpr, error) {
 			}
 
 			newTokens := []Node{}
-			i := 0
 
 		ShiftRigth:
-			for i < len(tokens) { // iterate by tokens for each rule
+			for len(tokens) > 0 {
 				params := []Node{}
 				for _, ruleElem := range rule.Pattern {
-					if i == len(tokens) {
-						// rule length > tail of tokens, pass rest of tokens as is
+					head, tail, ok := getMatchedChunk(ruleElem, tokens)
+					if !ok {
 						newTokens = append(newTokens, params...)
+						if len(tokens) > 0 {
+							newTokens = append(newTokens, tokens[0])
+							tokens = tokens[1:]
+						}
 						continue ShiftRigth
 					}
 
-					nextToken := tokens[i]
-					params = append(params, nextToken)
-					i++
-					if ruleElem.Type != nextToken.Type() {
-						// pattern NOT match or tokens is finished, pass old tokens
-						newTokens = append(newTokens, params...)
-						continue ShiftRigth
-					}
+					params = append(params, head...)
+					tokens = tail
 				}
 				// pattern match! replace by new Node
 				applyRulesCount++
