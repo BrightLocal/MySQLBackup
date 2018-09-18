@@ -21,14 +21,14 @@ type BoolExpr interface {
 }
 
 type Rule struct {
-	CreateNode func(params []Node) Node
-	Pattern    []RuleItem
+	createNodeFn func(params []Node) Node
+	pattern      []RuleItem
 }
 
 type RuleItem struct {
 	nodeType NodeType
-	MinCount int // item with modificators '*','+','?' like "... IN ( Literal* )"
-	MaxCount int
+	minCount int // item with modificators '*','+','?' like "... IN ( Literal* )"
+	maxCount int
 }
 
 func (ri RuleItem) Type() NodeType {
@@ -80,8 +80,8 @@ var (
 
 var rules = []Rule{
 	{
-		Pattern: parsePattern("Field SimpleOp Literal"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("Field SimpleOp Literal"),
+		createNodeFn: func(params []Node) Node {
 			field := string(params[0].(SrcNode))
 
 			argument, err := parseLiteral(string(params[2].(SrcNode)))
@@ -108,16 +108,16 @@ var rules = []Rule{
 		},
 	},
 	{
-		Pattern: parsePattern("Field IS_NULL"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("Field IS_NULL"),
+		createNodeFn: func(params []Node) Node {
 			return OpIsNull{
 				field: string(params[0].(SrcNode)),
 			}
 		},
 	},
 	{
-		Pattern: parsePattern("Field IN ( Literal+ )"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("Field IN ( Literal+ )"),
+		createNodeFn: func(params []Node) Node {
 			if len(params) < 5 {
 				return OpError{errorMsg: fmt.Sprintf("not enough arguments for IN operation: %+v", params)}
 			}
@@ -138,16 +138,16 @@ var rules = []Rule{
 		},
 	},
 	{
-		Pattern: parsePattern("NOT BoolExpr"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("NOT BoolExpr"),
+		createNodeFn: func(params []Node) Node {
 			return OpNot{
 				x: params[1].(BoolExpr),
 			}
 		},
 	},
 	{
-		Pattern: parsePattern("BoolExpr AND BoolExpr"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("BoolExpr AND BoolExpr"),
+		createNodeFn: func(params []Node) Node {
 			return OpAnd{
 				x: params[0].(BoolExpr),
 				y: params[2].(BoolExpr),
@@ -155,8 +155,8 @@ var rules = []Rule{
 		},
 	},
 	{
-		Pattern: parsePattern("BoolExpr OR BoolExpr"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("BoolExpr OR BoolExpr"),
+		createNodeFn: func(params []Node) Node {
 			return OpOr{
 				x: params[0].(BoolExpr),
 				y: params[2].(BoolExpr),
@@ -164,8 +164,8 @@ var rules = []Rule{
 		},
 	},
 	{
-		Pattern: parsePattern("( BoolExpr )"),
-		CreateNode: func(params []Node) Node {
+		pattern: parsePattern("( BoolExpr )"),
+		createNodeFn: func(params []Node) Node {
 			return params[1]
 		},
 	},
@@ -210,8 +210,8 @@ func parsePattern(pattern string) []RuleItem {
 
 		result = append(result, RuleItem{
 			nodeType: NodeType(item),
-			MinCount: minCount,
-			MaxCount: maxCount,
+			minCount: minCount,
+			maxCount: maxCount,
 		})
 	}
 
@@ -260,16 +260,16 @@ func getMatchedChunk(what RuleItem, in []Node) (head []Node, tail []Node, ok boo
 	for i < len(in) && what.Type() == in[i].Type() {
 		head = append(head, in[i])
 
-		if i+1 >= what.MinCount {
+		if i+1 >= what.minCount {
 			ok = true
 		}
-		if what.MaxCount != -1 && i+1 >= what.MaxCount {
+		if what.maxCount != -1 && i+1 >= what.maxCount {
 			break
 		}
 		i++
 	}
 
-	if !ok && what.MinCount == 0 {
+	if !ok && what.minCount == 0 {
 		return nil, in, true
 	} else if !ok {
 		return nil, in, false
@@ -300,7 +300,7 @@ func parse(expr string) (BoolExpr, error) {
 		applyRulesCount = 0
 
 		for _, rule := range rules {
-			if len(rule.Pattern) > len(tokens) {
+			if len(rule.pattern) > len(tokens) {
 				continue
 			}
 
@@ -309,7 +309,7 @@ func parse(expr string) (BoolExpr, error) {
 		ShiftRigth:
 			for len(tokens) > 0 {
 				params := []Node{}
-				for _, ruleElem := range rule.Pattern {
+				for _, ruleElem := range rule.pattern {
 					head, tail, ok := getMatchedChunk(ruleElem, tokens)
 					if !ok {
 						newTokens = append(newTokens, params...)
@@ -325,7 +325,7 @@ func parse(expr string) (BoolExpr, error) {
 				}
 				// pattern match! replace by new Node
 				applyRulesCount++
-				newTokens = append(newTokens, rule.CreateNode(params))
+				newTokens = append(newTokens, rule.createNodeFn(params))
 			}
 
 			tokens = newTokens

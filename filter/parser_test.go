@@ -59,8 +59,8 @@ func Test_getMatchedChunk(t *testing.T) {
 			args: args{
 				what: RuleItem{
 					nodeType: "a",
-					MinCount: 0,
-					MaxCount: -1,
+					minCount: 0,
+					maxCount: -1,
 				},
 				in: nil,
 			},
@@ -73,8 +73,8 @@ func Test_getMatchedChunk(t *testing.T) {
 			args: args{
 				what: RuleItem{
 					nodeType: "a",
-					MinCount: 1,
-					MaxCount: 1,
+					minCount: 1,
+					maxCount: 1,
 				},
 				in: []Node{node("a"), node("b")},
 			},
@@ -87,8 +87,8 @@ func Test_getMatchedChunk(t *testing.T) {
 			args: args{
 				what: RuleItem{
 					nodeType: "a",
-					MinCount: 1,
-					MaxCount: -1,
+					minCount: 1,
+					maxCount: -1,
 				},
 				in: []Node{node("a"), node("a"), node("b")},
 			},
@@ -101,8 +101,8 @@ func Test_getMatchedChunk(t *testing.T) {
 			args: args{
 				what: RuleItem{
 					nodeType: "a",
-					MinCount: 0,
-					MaxCount: -1,
+					minCount: 0,
+					maxCount: -1,
 				},
 				in: []Node{node("a"), node("a"), node("b")},
 			},
@@ -115,8 +115,8 @@ func Test_getMatchedChunk(t *testing.T) {
 			args: args{
 				what: RuleItem{
 					nodeType: "a",
-					MinCount: 1,
-					MaxCount: 2,
+					minCount: 1,
+					maxCount: 2,
 				},
 				in: []Node{node("a"), node("a"), node("a"), node("b")},
 			},
@@ -129,8 +129,8 @@ func Test_getMatchedChunk(t *testing.T) {
 			args: args{
 				what: RuleItem{
 					nodeType: "a",
-					MinCount: 3,
-					MaxCount: 3,
+					minCount: 3,
+					maxCount: 3,
 				},
 				in: []Node{node("a"), node("a"), node("b")},
 			},
