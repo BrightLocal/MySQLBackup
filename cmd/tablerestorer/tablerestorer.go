@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/BrightLocal/MySQLBackup/dir_restorer"
+	"github.com/BrightLocal/MySQLBackup/filter"
 	"github.com/BrightLocal/MySQLBackup/mylogin_reader"
 	"github.com/BrightLocal/MySQLBackup/worker_pool"
 )
@@ -28,6 +29,8 @@ type restorerConfig struct {
 	DSN        string
 	Create     bool
 	Truncate   bool
+	Filter     string
+	DryRun     bool
 }
 
 func main() {
@@ -45,6 +48,8 @@ func main() {
 	flag.BoolVar(&cfg.Create, "create", false, "Create tables if they do not exist")
 	flag.BoolVar(&cfg.Truncate, "truncate", false, "Clear tables before restoring")
 	flag.IntVar(&cfg.Streams, "streams", runtime.NumCPU(), "How many tables to restore in parallel")
+	flag.StringVar(&cfg.Filter, "filter", "", "Filter rows by expression")
+	flag.BoolVar(&cfg.DryRun, "dry-run", false, "Dry run with print SQL into stdout")
 	flag.Parse()
 	if cfg.Database == "" {
 		flag.Usage()
@@ -61,8 +66,16 @@ func main() {
 			skipList[strings.TrimSpace(t)] = struct{}{}
 		}
 	}
+
+	dataFilter, err := filter.NewFilterSet(cfg.Filter)
+	if err != nil {
+		log.Fatalf("error to parse filter (%s): %s", cfg.Filter, err)
+	}
+
 	dr := dir_restorer.
 		NewDirRestorer(cfg.Dir).
+		WithFilter(dataFilter).
+		WithDryRun(cfg.DryRun).
 		Connect(cfg.DSN, cfg.Database).
 		CreateTables(cfg.Create).
 		TruncateTables(cfg.Truncate)

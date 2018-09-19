@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/BrightLocal/MySQLBackup/filter"
 	"github.com/BrightLocal/MySQLBackup/table_restorer"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -34,6 +35,8 @@ type DirRestorer struct {
 	totalDuration time.Duration
 	create        bool
 	truncate      bool
+	filter        filter.FilterSet
+	dryRun        bool
 }
 
 func NewDirRestorer(dir string) *DirRestorer {
@@ -55,6 +58,16 @@ func (d *DirRestorer) Connect(dsn, db string) *DirRestorer {
 	if err != nil {
 		log.Fatalf("Error connecting: %s", err)
 	}
+	return d
+}
+
+func (d *DirRestorer) WithFilter(filter filter.FilterSet) *DirRestorer {
+	d.filter = filter
+	return d
+}
+
+func (d *DirRestorer) WithDryRun(dryRun bool) *DirRestorer {
+	d.dryRun = dryRun
 	return d
 }
 
@@ -166,36 +179,41 @@ func (d *DirRestorer) Restore(tableName interface{}) {
 		log.Printf("could not detect compression format for file %q", fileName)
 		return
 	}
-	rows, err := d.conn.Query(
-		"SELECT `table_name` FROM `information_schema`.`tables` WHERE `table_schema`=? AND `table_name`=?",
-		d.db,
-		name,
-	)
-	if err != nil {
-		log.Fatalf("error checking if table exists: %s", err)
-	}
-	if rows.Next() {
-		if d.truncate {
-			log.Printf("Truncating table %s", name)
-			if _, err := d.conn.Exec("TRUNCATE TABLE `" + name + "`"); err != nil {
-				log.Fatalf("error clearing table %s: %s", name, err)
-			}
+
+	if !d.dryRun {
+		rows, err := d.conn.Query(
+			"SELECT `table_name` FROM `information_schema`.`tables` WHERE `table_schema`=? AND `table_name`=?",
+			d.db,
+			name,
+		)
+
+		if err != nil {
+			log.Fatalf("error checking if table exists: %s", err)
 		}
-	} else {
-		if d.create {
-			log.Printf("Creating table %s", name)
-			createQuery := FindTableCreate(d.schema, name)
-			if createQuery == "" {
-				log.Fatalf("could not find create statement for table %s", name)
-			}
-			if _, err := d.conn.Exec(createQuery); err != nil {
-				log.Fatalf("error creating table %s: %s", name, err)
+		if rows.Next() {
+			if d.truncate {
+				log.Printf("Truncating table %s", name)
+				if _, err := d.conn.Exec("TRUNCATE TABLE `" + name + "`"); err != nil {
+					log.Fatalf("error clearing table %s: %s", name, err)
+				}
 			}
 		} else {
-			log.Fatalf("table %s does not exist, and automatic creation not allowed", name)
+			if d.create {
+				log.Printf("Creating table %s", name)
+				createQuery := FindTableCreate(d.schema, name)
+				if createQuery == "" {
+					log.Fatalf("could not find create statement for table %s", name)
+				}
+				if _, err := d.conn.Exec(createQuery); err != nil {
+					log.Fatalf("error creating table %s: %s", name, err)
+				}
+			} else {
+				log.Fatalf("table %s does not exist, and automatic creation not allowed", name)
+			}
 		}
 	}
-	tr := table_restorer.New(d.dsn, name, FindTableColumns(d.schema, name))
+
+	tr := table_restorer.New(d.dsn, name, FindTableColumns(d.schema, name)).WithDryRun(d.dryRun).WithFilter(d.filter[name])
 	restoreResult, err := tr.Run(decompressor, d.conn)
 	if err != nil {
 		log.Printf("Error running worker: %s", err)
