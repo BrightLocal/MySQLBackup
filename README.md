@@ -30,3 +30,49 @@ Optionally, with header, when `-with-header` option is used:
 "123","multi line\nvalue",null,""
 ```
 Note: Dumper will try to use Percona's backup locks for consistency of the snapshots.
+
+## tablerestorer
+
+Usage:
+```
+  -create
+    	Create tables if they do not exist
+  -database string
+    	Database name to restore
+  -dir string
+    	Source directory path (default ".")
+  -dry-run
+    	Dry run with print SQL into stdout
+  -filter string
+    	Filter rows by expression
+  -hostname string
+    	Host name (default "localhost")
+  -login-path string
+    	Login path
+  -password string
+    	Password
+  -port int
+    	Port number (default 3306)
+  -skip-tables string
+    	Table names to skip (incompatible with -tables)
+  -streams int
+    	How many tables to restore in parallel (default 8)
+  -tables string
+    	Tables to restore (incompatible with -skip-tables)
+  -truncate
+    	Clear tables before restoring
+  -username string
+    	User name
+```
+
+### -filter
+
+This option allows sql like expression for filter rows.
+
+Examples:
+
+  * `field == "value"`
+  * `NOT field == "value"` or `NOT (field == "value")`
+  * `field1 == "value" AND field2 >= 123`
+  * `field1 == "value" OR f2 != 435 AND field2 >= 123`
+  * `field1 IN ("value", "v2")`
