@@ -1,5 +1,7 @@
 # MySQLBackup
 
+## tabledumper
+
 Dumps database tables into compressed data files. Only real tables will be dumped (not views).
 
 Usage:
@@ -65,15 +67,21 @@ Usage:
     	User name
 ```
 
-### -filter
+### -filter option
 
 This option allows sql like expression for filter rows.
 
 Examples:
 
-  * `field == "value"`
-  * `NOT field == "value"` or `NOT (field == "value")`
-  * `field1 == "value" AND field2 >= 123`
-  * `field1 == "value" OR f2 != 435 AND field2 >= 123`
-  * `field1 IN ("value", "v2")`
-  * `field1 LIKE "%value_x%"`
+  * `table_name(field == "value"),table_name2(field_name > 23)`
+  * `table_name(NOT field == "value"` or `NOT (field == "value"))`
+  * `table_name(field1 == "value" AND field2 >= 123)`
+  * `table_name(field1 == "value" OR f2 != 435 AND field2 >= 123)`
+  * `table_name(field1 IN ("value", "v2"))`
+  * `table_name(field1 LIKE "%value_x%")`
+
+### examples
+
+```
+  tablerestorer -database 'mysql_user:mysql_password@tcp(127.0.0.1)/db_name' -dry-run -filter 'table(name LIKE "1%" OR id > 1000)'
+```
