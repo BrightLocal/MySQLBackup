@@ -76,3 +76,4 @@ Examples:
   * `field1 == "value" AND field2 >= 123`
   * `field1 == "value" OR f2 != 435 AND field2 >= 123`
   * `field1 IN ("value", "v2")`
+  * `field1 LIKE "%value_x%"`

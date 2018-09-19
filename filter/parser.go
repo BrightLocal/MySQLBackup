@@ -58,6 +58,8 @@ func (sn SrcNode) Type() NodeType {
 		return "IN"
 	case sn == "IS NULL":
 		return "IS_NULL"
+	case sn == "LIKE":
+		return "LIKE"
 	case sn.isSimpleOp():
 		return "SimpleOp"
 	case reField.MatchString(string(sn)):
@@ -113,6 +115,21 @@ var rules = []Rule{
 			return OpIsNull{
 				field: string(params[0].(SrcNode)),
 			}
+		},
+	},
+	{
+		pattern: parsePattern("Field LIKE Literal"),
+		createNodeFn: func(params []Node) Node {
+			reSrc, err := parseLiteral(string(params[2].(SrcNode)))
+			if err != nil {
+				return OpError{errorMsg: fmt.Sprintf("failed to parse regexp literal %v: %s", params[2], err)}
+			}
+			re, ok := reSrc.(string)
+			if !ok {
+				return OpError{errorMsg: fmt.Sprintf("regexp: %[1]v (%[1]T) must have a string type", reSrc)}
+			}
+
+			return NewOpLike(string(params[0].(SrcNode)), re)
 		},
 	},
 	{
@@ -404,6 +421,10 @@ func validate(tokens []string) error {
 			if !isField(tokens[i-1]) {
 				errors.New("expected field before IS NULL")
 			}
+		case "LIKE": // "field LIKE '%x_x_x%'"
+			if !isField(tokens[i-1]) {
+				errors.New("expected field before LIKE")
+			}
 		}
 	}
 	if bracesCount > 0 {
@@ -415,30 +436,30 @@ func validate(tokens []string) error {
 }
 
 var (
-	splitters = map[string]string{
-		"(":       "",
-		")":       "",
-		",":       "",
-		"'":       "",
-		"==":      "",
-		"!=":      "",
-		">":       "",
-		">=":      "",
-		"<":       "",
-		"<=":      "",
-		"IN":      "",
-		"AND":     "",
-		"OR":      "",
-		"NOT":     "",
-		"IS NULL": "",
+	splitters = map[string]bool{
+		"(":       true,
+		")":       true,
+		",":       true,
+		"'":       true,
+		"==":      true,
+		"!=":      true,
+		">":       true,
+		">=":      true,
+		"<":       true,
+		"<=":      true,
+		"IN":      true,
+		"AND":     true,
+		"OR":      true,
+		"NOT":     true,
+		"IS NULL": true,
+		"LIKE":    true,
 	}
 )
 
 const maxTokenLen = 64 // the longest splitter length
 
 func isSplitter(value string) bool {
-	_, ok := splitters[value]
-	return ok
+	return splitters[value]
 }
 
 func isValue(value string) bool {
