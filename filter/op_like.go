@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -14,17 +13,17 @@ type OpLike struct {
 	re    *regexp.Regexp
 }
 
-func NewOpLike(field, reSource string) Node {
+func NewOpLike(field, reSource string) (Node, error) {
 	reStr := strings.Replace(strings.Replace(regexp.QuoteMeta(reSource), "_", ".", -1), "%", ".*", -1)
 	re, err := regexp.Compile(reStr)
 	if err != nil {
-		return OpError{errorMsg: fmt.Sprintf("failed to compile regexp (src: %s, re: %s): %s", reSource, reStr, err)}
+		return nil, errors.Wrapf(err, "failed to compile regexp (src: %s, re: %s)", reSource, reStr)
 	}
 
 	return OpLike{
 		field: field,
 		re:    re,
-	}
+	}, nil
 }
 
 func (o OpLike) Type() NodeType {

@@ -21,7 +21,7 @@ type BoolExpr interface {
 }
 
 type Rule struct {
-	createNodeFn func(params []Node) Node
+	createNodeFn func(params []Node) (Node, error)
 	pattern      []RuleItem
 }
 
@@ -83,50 +83,50 @@ var (
 var rules = []Rule{
 	{
 		pattern: parsePattern("Field SimpleOp Literal"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			field := string(params[0].(SrcNode))
 
 			argument, err := parseLiteral(string(params[2].(SrcNode)))
 			if err != nil {
-				return OpError{errorMsg: err.Error()}
+				return nil, err
 			}
 
 			switch params[1].(SrcNode) {
 			case "==":
-				return OpEq{field: field, argument: argument}
+				return OpEq{field: field, argument: argument}, nil
 			case "!=":
-				return OpNe{field: field, argument: argument}
+				return OpNe{field: field, argument: argument}, nil
 			case ">":
-				return OpGt{field: field, argument: argument}
+				return OpGt{field: field, argument: argument}, nil
 			case ">=":
-				return OpGe{field: field, argument: argument}
+				return OpGe{field: field, argument: argument}, nil
 			case "<":
-				return OpLt{field: field, argument: argument}
+				return OpLt{field: field, argument: argument}, nil
 			case "<=":
-				return OpLe{field: field, argument: argument}
+				return OpLe{field: field, argument: argument}, nil
 			default:
-				return OpError{errorMsg: fmt.Sprintf("not known operation: %v", params[1])}
+				return nil, errors.Errorf("not known operation: %v", params[1])
 			}
 		},
 	},
 	{
 		pattern: parsePattern("Field IS_NULL"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			return OpIsNull{
 				field: string(params[0].(SrcNode)),
-			}
+			}, nil
 		},
 	},
 	{
 		pattern: parsePattern("Field LIKE Literal"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			reSrc, err := parseLiteral(string(params[2].(SrcNode)))
 			if err != nil {
-				return OpError{errorMsg: fmt.Sprintf("failed to parse regexp literal %v: %s", params[2], err)}
+				return nil, errors.Wrapf(err, "failed to parse regexp literal %v: %s", params[2])
 			}
 			re, ok := reSrc.(string)
 			if !ok {
-				return OpError{errorMsg: fmt.Sprintf("regexp: %[1]v (%[1]T) must have a string type", reSrc)}
+				return nil, errors.Errorf("regexp: %[1]v (%[1]T) must have a string type", reSrc)
 			}
 
 			return NewOpLike(string(params[0].(SrcNode)), re)
@@ -134,16 +134,16 @@ var rules = []Rule{
 	},
 	{
 		pattern: parsePattern("Field IN ( Literal+ )"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			if len(params) < 5 {
-				return OpError{errorMsg: fmt.Sprintf("not enough arguments for IN operation: %+v", params)}
+				return nil, errors.Errorf("not enough arguments for IN operation: %+v", params)
 			}
 
 			arguments := []interface{}{}
 			for _, item := range params[3 : len(params)-1] {
 				literal, err := parseLiteral(string(item.(SrcNode)))
 				if err != nil {
-					return OpError{errorMsg: err.Error()}
+					return nil, err
 				}
 				arguments = append(arguments, literal)
 			}
@@ -151,39 +151,39 @@ var rules = []Rule{
 			return OpIn{
 				field:     string(params[0].(SrcNode)),
 				arguments: arguments,
-			}
+			}, nil
 		},
 	},
 	{
 		pattern: parsePattern("NOT BoolExpr"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			return OpNot{
 				x: params[1].(BoolExpr),
-			}
+			}, nil
 		},
 	},
 	{
 		pattern: parsePattern("BoolExpr AND BoolExpr"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			return OpAnd{
 				x: params[0].(BoolExpr),
 				y: params[2].(BoolExpr),
-			}
+			}, nil
 		},
 	},
 	{
 		pattern: parsePattern("BoolExpr OR BoolExpr"),
-		createNodeFn: func(params []Node) Node {
+		createNodeFn: func(params []Node) (Node, error) {
 			return OpOr{
 				x: params[0].(BoolExpr),
 				y: params[2].(BoolExpr),
-			}
+			}, nil
 		},
 	},
 	{
 		pattern: parsePattern("( BoolExpr )"),
-		createNodeFn: func(params []Node) Node {
-			return params[1]
+		createNodeFn: func(params []Node) (Node, error) {
+			return params[1], nil
 		},
 	},
 }
@@ -342,7 +342,11 @@ func parse(expr string) (BoolExpr, error) {
 				}
 				// pattern match! replace by new Node
 				applyRulesCount++
-				newTokens = append(newTokens, rule.createNodeFn(params))
+				newNode, err := rule.createNodeFn(params)
+				if err != nil {
+					return nil, err
+				}
+				newTokens = append(newTokens, newNode)
 			}
 
 			tokens = newTokens

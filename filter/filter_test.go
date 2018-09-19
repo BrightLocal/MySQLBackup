@@ -198,8 +198,8 @@ func TestFilter(t *testing.T) {
 			data:         map[string]interface{}{"foo": "val1", "bar": 123},
 			expression:   `foo LIKE 123`,
 			want:         false,
-			wantParseErr: false,
-			wantErr:      true,
+			wantParseErr: true,
+			wantErr:      false,
 		},
 		{
 			name:         "types mismatch",
