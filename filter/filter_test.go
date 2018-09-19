@@ -161,6 +161,22 @@ func TestFilter(t *testing.T) {
 			wantParseErr: false,
 			wantErr:      true,
 		},
+		{
+			name:         "broken expression 1",
+			data:         map[string]interface{}{"foo": "val", "bar": 123},
+			expression:   `foo > 123 OR 123`,
+			want:         false,
+			wantParseErr: true,
+			wantErr:      false,
+		},
+		{
+			name:         "broken expression 2",
+			data:         map[string]interface{}{"foo": "val", "bar": 123},
+			expression:   `foo`,
+			want:         false,
+			wantParseErr: true,
+			wantErr:      false,
+		},
 	}
 
 	for _, tt := range tests {
