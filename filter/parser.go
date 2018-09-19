@@ -419,15 +419,15 @@ func validate(tokens []string) error {
 				return errors.New("unexpected end of " + p)
 			}
 			if !(tokens[i+1] == "(" || isValue(tokens[i+1]) || isField(tokens[i+1])) {
-				errors.New("expected field or value or opening brace after " + p)
+				return errors.New("expected field or value or opening brace after " + p)
 			}
 		case "IS NULL": // "field IS NULL"
 			if !isField(tokens[i-1]) {
-				errors.New("expected field before IS NULL")
+				return errors.New("expected field before IS NULL")
 			}
 		case "LIKE": // "field LIKE '%x_x_x%'"
 			if !isField(tokens[i-1]) {
-				errors.New("expected field before LIKE")
+				return errors.New("expected field before LIKE")
 			}
 		}
 	}
