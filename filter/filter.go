@@ -14,14 +14,16 @@ var (
 
 // NewFilterSet returns new filters for expression:
 // table_name(field == "val"),table02(field02 != "val2" AND field03 == 123)
-func NewFilterSet(expression string) (result FilterSet, err error) {
+func NewFilterSet(expression string) (FilterSet, error) {
+	result := map[string]BoolExpr{}
 	for table, expr := range split(expression) {
+		var err error
 		result[table], err = NewFilter(expr)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return
+	return result, nil
 }
 
 // NewFilter returns new filter for table expression:
