@@ -122,7 +122,7 @@ var rules = []Rule{
 		createNodeFn: func(params []Node) (Node, error) {
 			reSrc, err := parseLiteral(string(params[2].(SrcNode)))
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to parse regexp literal %v: %s", params[2])
+				return nil, errors.Wrapf(err, "failed to parse regexp literal %v", params[2])
 			}
 			re, ok := reSrc.(string)
 			if !ok {
