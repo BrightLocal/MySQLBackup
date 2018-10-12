@@ -17,10 +17,7 @@ ENV PATH $GOPATH/bin:/bin:$PATH
 
 RUN mkdir -p $WORKDIR && chown -R jenkins:jenkins /home/jenkins/go
 
-RUN rm -rf /var/cache/apk/*
-
 RUN apt-get -y autoremove && apt-get -y autoclean
-
 
 WORKDIR $WORKDIR
 
