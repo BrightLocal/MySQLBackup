@@ -7,4 +7,4 @@ services:
     restart: on-failure
     user: jenkins
     volumes:
-      - ../.:/home/jenkins/go
+      - ../.:/home/jenkins/go/src/github.com/BrightLocal/MySQLBackup
