@@ -5,5 +5,6 @@ services:
     build: ./go
     hostname: go
     restart: on-failure
+    user: jenkins
     volumes:
       - ../.:/home/jenkins/app

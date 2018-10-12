@@ -1,4 +1,5 @@
 FROM golang:1.10
+MAINTAINER Vitalii Harbulinskyi <vitaly@brightlocal.com>
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y software-properties-common wget nano software-properties-common
@@ -14,7 +15,7 @@ RUN rm -rf /var/cache/apk/*
 
 RUN apt-get -y autoremove && apt-get -y autoclean
 
-ENV GOPATH /home/jenkins/app
+ENV GOPATH $HOME
 ENV GOROOT /usr/local/go
 ENV PATH $GOPATH/bin:/bin:$PATH
 
