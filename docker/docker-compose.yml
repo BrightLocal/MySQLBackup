@@ -6,4 +6,4 @@ services:
     hostname: go
     restart: on-failure
     volumes:
-      - ../../:/home/jenkins/app
+      - ../.:/home/jenkins/app
