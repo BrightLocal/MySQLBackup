@@ -3,11 +3,9 @@ MAINTAINER Vitalii Harbulinskyi <vitaly@brightlocal.com>
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y software-properties-common wget nano software-properties-common
-RUN apt-get update && apt-get install -y curl git zip unzip sudo
+RUN apt-get update && apt-get install -y curl git zip unzip
 
-RUN useradd -u 1005 -m jenkins && echo "jenkins:jenkins" | chpasswd && adduser jenkins sudo
-
-RUN sudo echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN useradd -u 1005 -m jenkins && echo "jenkins:jenkins" | chpasswd
 
 ENV HOME /home/jenkins
 ENV GOPATH $HOME/go
