@@ -13,7 +13,7 @@ ENV HOME /home/jenkins
 ENV GOPATH $HOME/go
 ENV PATH $GOPATH/bin:/bin:$PATH
 
-RUN mkdir $GOPATH && chown -R jenkins:jenkins $GOPATH
+RUN mkdir /home/jenkins/go && chown -R jenkins:jenkins /home/jenkins/go
 
 RUN rm -rf /var/cache/apk/*
 
