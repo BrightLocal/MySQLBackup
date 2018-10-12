@@ -11,7 +11,6 @@ RUN sudo echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 ENV HOME /home/jenkins
 ENV GOPATH $HOME/go
-ENV GOBIN $GOPATH/bin
 ENV WORKDIR $GOPATH/src/github.com/BrightLocal/MySQLBackup
 ENV PATH $GOPATH/bin:/bin:$PATH
 
