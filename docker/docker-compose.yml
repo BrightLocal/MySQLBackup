@@ -1,0 +1,9 @@
+version: '2.1'
+
+services:
+  go:
+    build: ./go
+    hostname: go
+    restart: on-failure
+    volumes:
+      - ../../:/home/jenkins/app
