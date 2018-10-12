@@ -2,8 +2,8 @@ FROM golang:1.11
 MAINTAINER Vitalii Harbulinskyi <vitaly@brightlocal.com>
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y software-properties-common wget nano software-properties-common
-RUN apt-get update && apt-get install -y curl git zip unzip
+RUN apt-get install -y software-properties-common wget software-properties-common
+RUN apt-get install -y curl git zip unzip
 
 RUN useradd -u 1005 -m jenkins && echo "jenkins:jenkins" | chpasswd
 
