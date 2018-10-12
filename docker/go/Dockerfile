@@ -11,6 +11,7 @@ RUN sudo echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 ENV HOME /home/jenkins
 ENV GOPATH $HOME/go
+ENV GOBIN $GOPATH/bin
 ENV PATH $GOPATH/bin:/bin:$PATH
 
 RUN mkdir /home/jenkins/go && chown -R jenkins:jenkins /home/jenkins/go
