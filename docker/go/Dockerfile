@@ -14,7 +14,7 @@ RUN rm -rf /var/cache/apk/*
 
 RUN apt-get -y autoremove && apt-get -y autoclean
 
-ENV GOPATH /home/jenkins/go
+ENV GOPATH /home/jenkins/app
 ENV GOROOT /usr/local/go
 ENV PATH $GOPATH/bin:/bin:$PATH
 
