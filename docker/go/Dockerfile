@@ -13,13 +13,13 @@ ENV HOME /home/jenkins
 ENV GOPATH $HOME/go
 ENV PATH $GOPATH/bin:/bin:$PATH
 
-RUN mkdir /home/jenkins/go && chown -R jenkins:jenkins /home/jenkins/go
+RUN mkdir $GOPATH && chown -R jenkins:jenkins $GOPATH
 
 RUN rm -rf /var/cache/apk/*
 
 RUN apt-get -y autoremove && apt-get -y autoclean
 
 
-WORKDIR  $GOPATH
+WORKDIR $GOPATH
 
 CMD while true; do sleep 1000; done
