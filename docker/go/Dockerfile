@@ -15,7 +15,7 @@ ENV GOBIN $GOPATH/bin
 ENV WORKDIR $GOPATH/src/github.com/BrightLocal/MySQLBackup
 ENV PATH $GOPATH/bin:/bin:$PATH
 
-RUN mkdir /home/jenkins/go && chown -R jenkins:jenkins /home/jenkins/go
+RUN mkdir -p $WORKDIR && chown -R jenkins:jenkins /home/jenkins/go
 
 RUN rm -rf /var/cache/apk/*
 

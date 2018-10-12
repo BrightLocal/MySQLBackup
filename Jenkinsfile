@@ -18,7 +18,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 echo "Debug"
-                sh "docker exec -i ${COMPOSE_PROJECT_NAME}_go_1 bash -c 'go env'"
+                sh "docker exec -i ${COMPOSE_PROJECT_NAME}_go_1 bash -c 'ls -l /home/jenkins/go'"
                 echo 'Running go get'
                 sh "docker exec -i ${COMPOSE_PROJECT_NAME}_go_1 bash -c 'go get -t -v ./...'"
             }
