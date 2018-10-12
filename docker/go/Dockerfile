@@ -9,6 +9,7 @@ RUN useradd -u 1005 -m jenkins && echo "jenkins:jenkins" | chpasswd && adduser j
 RUN sudo echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN mkdir /home/jenkins/app && chown jenkins:jenkins /home/jenkins/app
+RUN mkdir /usr/local/golib
 
 RUN rm -rf /var/cache/apk/*
 
