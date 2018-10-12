@@ -8,15 +8,14 @@ RUN useradd -u 1005 -m jenkins && echo "jenkins:jenkins" | chpasswd && adduser j
 
 RUN sudo echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN mkdir /home/jenkins/app && chown jenkins:jenkins /home/jenkins/app
-RUN mkdir /usr/local/golib
+RUN mkdir /home/jenkins/app && chown jenkins:jenkins /home/jenkins/app && mkdir /home/jenkins/go && chown jenkins:jenkins /home/jenkins/go
 
 RUN rm -rf /var/cache/apk/*
 
 RUN apt-get -y autoremove && apt-get -y autoclean
 
-ENV GOPATH /usr/local/go
-ENV GOROOT /usr/local/golib
+ENV GOPATH /home/jenkins/go
+ENV GOROOT /usr/local/go
 ENV PATH $GOPATH/bin:/bin:$PATH
 
 WORKDIR /home/jenkins/app
