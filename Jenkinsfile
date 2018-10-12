@@ -18,7 +18,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 echo 'Running go get'
-                sh "docker exec -i ${COMPOSE_PROJECT_NAME}_go_1 bash -c 'go get -t ./...'"
+                sh "docker exec -i ${COMPOSE_PROJECT_NAME}_go_1 bash -c 'go get -t -v ./...'"
             }
         }
         stage('Test') {

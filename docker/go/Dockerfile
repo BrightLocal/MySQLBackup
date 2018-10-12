@@ -1,4 +1,4 @@
-FROM golang:1.10
+FROM golang:1.11
 MAINTAINER Vitalii Harbulinskyi <vitaly@brightlocal.com>
 
 RUN apt-get update && apt-get upgrade -y
