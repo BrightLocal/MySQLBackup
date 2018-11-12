@@ -1,0 +1,10 @@
+version: '2.1'
+
+services:
+  go:
+    build: ./go
+    hostname: go
+    restart: on-failure
+    user: jenkins
+    volumes:
+      - ../.:/home/jenkins/go/src/github.com/BrightLocal/MySQLBackup
