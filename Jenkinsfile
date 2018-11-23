@@ -5,7 +5,7 @@ pipeline {
     environment {
         DOCKER_LOCATION = './docker'
         COMPOSE_FILE = "${DOCKER_LOCATION}/docker-compose.yml"
-        COMPOSE_PROJECT_NAME = "${GIT_COMMIT}_${BUILD_NUMBER}"
+        COMPOSE_PROJECT_NAME = "mysql_backup_${GIT_COMMIT.take(8)}_${BUILD_NUMBER}"
     }
 
     stages {

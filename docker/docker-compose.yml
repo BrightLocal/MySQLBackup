@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   go:
-    build: ./go
+    image: dev-registry.bll-i.co.uk/brightlocal/golang-1.11:latest
     hostname: go
     restart: on-failure
     user: jenkins
