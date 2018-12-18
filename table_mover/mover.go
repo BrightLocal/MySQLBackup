@@ -2,8 +2,10 @@ package table_mover
 
 import (
 	"fmt"
+	"github.com/kr/pretty"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -30,7 +32,7 @@ func New(src, dst string) *Mover {
 	}
 }
 
-const pageSize = 100
+const pageSize = 1000
 
 /*
 [*] Check if src table exists
@@ -78,11 +80,24 @@ func (m *Mover) Move(table string) error {
 	if m.stmtInsert, err = m.dst.Preparex(dstTable.insert()); err != nil {
 		return err
 	}
+	var startIndex *string
+	if err := m.dst.QueryRow(
+		fmt.Sprintf( //language=MySQL
+			"SELECT MAX(`%s`) FROM `%s`",
+			srcTable.PK(), dstTable.Name),
+	).Scan(&startIndex); err != nil {
+		return err
+	}
+	if startIndex == nil {
+		zero := "0"
+		startIndex = &zero
+	}
+	m.log.Printf("Starting with pk %s", *startIndex)
 	pks := make(chan string)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		if err := m.readPKs(srcTable, pks); err != nil {
+		if err := m.readPKs(srcTable, *startIndex, pks); err != nil {
 			m.log.Printf("Error reading PKs: %s", err)
 		}
 		close(pks)
@@ -101,7 +116,7 @@ func (m *Mover) Move(table string) error {
 		}
 		t++
 		if time.Now().After(tick) {
-			m.log.Printf("Moved %d rows, skipped %d", n, t-n)
+			m.log.Printf("Moved %d rows, skipped %d, lastest key: %s", n, t-n, pk)
 			tick = time.Now().Add(time.Minute)
 		}
 	}
@@ -132,7 +147,7 @@ func (Mover) getTable(tableName string, db *sqlx.DB) (*table, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var t table
 	t.Name = tableName
 	for rows.Next() {
@@ -162,7 +177,7 @@ func (Mover) getTable(tableName string, db *sqlx.DB) (*table, error) {
 	return &t, nil
 }
 
-func (m *Mover) readPKs(t *table, emit chan string) error {
+func (m *Mover) readPKs(t *table, start interface{}, emit chan string) error {
 	var max int
 	if err := m.src.QueryRow(
 		fmt.Sprintf( //language=MySQL
@@ -173,11 +188,11 @@ func (m *Mover) readPKs(t *table, emit chan string) error {
 		return err
 	}
 	pagedQuery := fmt.Sprintf( //language=MySQL
-		"SELECT `%s` FROM `%s` LIMIT ? OFFSET ?",
-		t.PK(), t.Name,
+		"SELECT `%s` FROM `%s` WHERE `%s` > ? ORDER BY `%s` LIMIT ? OFFSET ?",
+		t.PK(), t.Name, t.PK(), t.PK(),
 	)
 	for offset := 0; offset < max; offset += pageSize {
-		rows, err := m.src.Query(pagedQuery, pageSize, offset)
+		rows, err := m.src.Query(pagedQuery, start, pageSize, offset)
 		if err != nil {
 			return err
 		}
@@ -188,7 +203,7 @@ func (m *Mover) readPKs(t *table, emit chan string) error {
 			}
 			emit <- col
 		}
-		rows.Close()
+		_ = rows.Close()
 	}
 	return nil
 }
@@ -201,11 +216,16 @@ func (m *Mover) pkExists(pk string) bool {
 	return count > 0
 }
 
-func (m *Mover) migratePK(pk string) error {
+func (m *Mover) migratePK(pk string) (err error) {
 	cols, err := m.stmtSelect.QueryRowx(pk).SliceScan()
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if err != nil && strings.Contains(err.Error(), "truncated") {
+			m.log.Printf("Failed row: %# v", pretty.Formatter(cols))
+		}
+	} ()
 	_, err = m.stmtInsert.Exec(cols...)
 	return err
 }
