@@ -85,3 +85,9 @@ Examples:
 ```
   tablerestorer -database 'mysql_user:mysql_password@tcp(127.0.0.1)/db_name' -dry-run -filter 'table(name LIKE "1%" OR id > 1000)'
 ```
+
+## tablemover
+
+Copies tables content from one database to another.
+
+// TODO
